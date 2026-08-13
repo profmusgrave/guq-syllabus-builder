@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Syllabus builder for Georgetown University in Qatar faculty — AY 2026–27 calendar, Sunday–Thursday week, schedule swaps, and CNDLS-vetted policy language built in.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23041E42'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='Georgia,serif' font-size='11' font-weight='bold' fill='white'%3EGQ%3C/text%3E%3C/svg%3E">
+<title>GU-Q Syllabus Builder — AY 2026–27</title>
+<style>
+  :root{
+    --gu-blue:#041E42;        /* Georgetown blue */
+    --gu-blue-mid:#153a6e;
+    --gu-blue-soft:#e8edf5;
+    --gu-gray:#63666A;        /* Hoya gray */
+    --gu-gray-light:#a7a9ac;
+    --paper:#f7f8fa;
+    --card:#ffffff;
+    --line:#d9dce1;
+    --ink:#1b1e24;
+    --warn:#9a6b00;
+    --danger:#8e2f22;
+    --ok:#1f6b45;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0 0 5rem; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.5;
+  }
+  header{
+    background:var(--gu-blue); color:#fff; padding:1.4rem 1rem 1.2rem;
+    border-bottom:4px solid var(--gu-gray);
+  }
+  .shell{ max-width:720px; margin:0 auto; padding:0 1rem; }
+  header .shell{ padding:0 1rem; }
+  header h1{
+    margin:0; font-family:Georgia,"Times New Roman",serif; font-weight:700;
+    font-size:1.45rem; letter-spacing:.01em;
+  }
+  header .sub{ margin:.3rem 0 0; font-size:.82rem; color:#c3cddd; }
+  header .sub b{ color:#fff; font-weight:600; }
+  #status{ font-size:.75rem; color:#9fb0ca; min-height:1em; margin-top:.4rem; }
+
+  section{
+    background:var(--card); border:1px solid var(--line); border-radius:10px;
+    padding:1.15rem 1.15rem 1.25rem; margin-top:1.1rem;
+  }
+  section h2{
+    font-family:Georgia,serif; font-size:1.05rem; margin:0 0 .8rem;
+    color:var(--gu-blue); display:flex; align-items:baseline; gap:.55rem;
+  }
+  section h2 .n{
+    font-family:inherit; font-size:.78rem; background:var(--gu-blue); color:#fff;
+    border-radius:4px; padding:.1rem .45rem; letter-spacing:.05em;
+  }
+  h3{ font-size:.85rem; color:var(--gu-gray); margin:1.1rem 0 .4rem; text-transform:uppercase; letter-spacing:.05em; }
+  label{ display:block; font-size:.78rem; color:var(--gu-gray); margin:.6rem 0 .2rem; }
+  input[type=text],input[type=email],input[type=number],textarea,select{
+    width:100%; padding:.5rem .55rem; border:1px solid var(--line); border-radius:6px;
+    font-size:.9rem; font-family:inherit; background:#fff; color:var(--ink);
+  }
+  textarea{ resize:vertical; min-height:4.5rem; }
+  textarea.policy{ min-height:6.5rem; font-size:.84rem; }
+  .row{ display:flex; gap:.6rem; flex-wrap:wrap; }
+  .row > div{ flex:1; min-width:9rem; }
+
+  /* Day-code picker — registrar codes, Sunday–Thursday week */
+  .daycodes{ display:flex; gap:.45rem; margin-top:.35rem; }
+  .daycode{
+    flex:1; text-align:center; cursor:pointer; user-select:none;
+    border:1.5px solid var(--line); border-radius:8px; padding:.55rem 0 .4rem; background:#fff;
+  }
+  .daycode .code{ font-family:Georgia,serif; font-weight:700; font-size:1.15rem; display:block; color:var(--gu-gray); }
+  .daycode .name{ font-size:.62rem; text-transform:uppercase; letter-spacing:.06em; color:var(--gu-gray-light); }
+  .daycode.on{ border-color:var(--gu-blue); background:var(--gu-blue-soft); }
+  .daycode.on .code{ color:var(--gu-blue); }
+  .daycode.on .name{ color:var(--gu-blue-mid); }
+
+  .intel{
+    margin-top:.9rem; border:1px solid var(--line); border-left:4px solid var(--gu-blue);
+    border-radius:6px; background:var(--gu-blue-soft); padding:.7rem .8rem; font-size:.82rem;
+  }
+  .intel p{ margin:.2rem 0; }
+  .intel .swap{ color:var(--warn); font-weight:600; }
+  .intel .count{ font-weight:700; color:var(--gu-blue); }
+
+  button{
+    font-family:inherit; cursor:pointer; border-radius:6px; border:1px solid var(--line);
+    background:#fff; padding:.45rem .8rem; font-size:.82rem; color:var(--ink);
+  }
+  button.primary{ background:var(--gu-blue); border-color:var(--gu-blue); color:#fff; }
+  button.primary:hover{ background:var(--gu-blue-mid); }
+  button.ghost{ background:transparent; border-color:transparent; color:var(--gu-gray); padding:.3rem .4rem; }
+  button.danger{ color:var(--danger); }
+  button:focus-visible,.daycode:focus-visible{ outline:2px solid var(--gu-blue-mid); outline-offset:2px; }
+  .btnrow{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
+
+  table{ width:100%; border-collapse:collapse; font-size:.82rem; }
+  th{ text-align:left; color:var(--gu-gray); font-weight:600; font-size:.7rem; text-transform:uppercase;
+      letter-spacing:.04em; padding:.3rem; border-bottom:2px solid var(--gu-blue); }
+  td{ padding:.22rem .3rem; vertical-align:top; border-bottom:1px solid #eef0f3; }
+  td input{ border:1px solid transparent; padding:.3rem; background:transparent; width:100%; }
+  td input:focus{ border-color:var(--line); background:#fff; }
+  .weeklabel{ font-family:Georgia,serif; font-weight:700; color:var(--gu-blue); white-space:nowrap; }
+  .datelabel{ white-space:nowrap; color:var(--gu-gray); }
+  .swaptag{ font-size:.65rem; color:var(--warn); display:block; }
+
+  .hint{ font-size:.76rem; color:var(--gu-gray); margin-top:.35rem; }
+  .warn{ color:var(--warn); }
+  .ok{ color:var(--ok); }
+  .empty{ font-size:.8rem; color:var(--gu-gray); font-style:italic; }
+
+  .list-item{ border:1px solid var(--line); border-radius:8px; padding:.6rem .7rem; margin-bottom:.55rem; background:#fff; }
+  .list-item .top{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+
+  /* Policy blocks */
+  .policyblock{ border:1px solid var(--line); border-radius:8px; margin-bottom:.7rem; background:#fff; overflow:hidden; }
+  .policyblock > .head{
+    display:flex; align-items:center; gap:.55rem; padding:.6rem .75rem; background:#fbfbfc;
+    border-bottom:1px solid transparent; cursor:pointer;
+  }
+  .policyblock.open > .head{ border-bottom-color:var(--line); }
+  .policyblock .head .title{ font-weight:600; font-size:.88rem; flex:1; color:var(--gu-blue); font-family:Georgia,serif; }
+  .policyblock .head .tag{ font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:var(--gu-gray-light); }
+  .policyblock .body{ display:none; padding:.7rem .75rem .85rem; }
+  .policyblock.open .body{ display:block; }
+  .stances{ display:flex; flex-direction:column; gap:.3rem; margin:.3rem 0 .6rem; }
+  .stances label{ display:flex; gap:.45rem; align-items:flex-start; font-size:.82rem; color:var(--ink); margin:0; cursor:pointer; }
+  .stances input{ margin-top:.2rem; }
+  .stances .desc{ color:var(--gu-gray); font-size:.74rem; }
+  .checklabel{ display:flex; align-items:center; gap:.4rem; font-size:.75rem; color:var(--gu-gray); white-space:nowrap; }
+  .dragchip{ display:flex; align-items:center; gap:.55rem; border:1px solid var(--line); border-radius:6px;
+    background:#fff; padding:.45rem .6rem; margin-bottom:.35rem; font-size:.84rem; cursor:grab; }
+  .dragchip.dragging, .policyblock.dragging{ opacity:.35; }
+  .draghandle{ cursor:grab; color:var(--gu-gray-light); font-size:.95rem; user-select:none; }
+
+  #output{
+    width:100%; min-height:18rem; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:.76rem; white-space:pre; overflow:auto;
+  }
+  footer{ text-align:center; font-size:.72rem; color:var(--gu-gray-light); margin-top:2rem; }
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="shell">
+    <h1>GU-Q Syllabus Builder</h1>
+    <p class="sub">Georgetown University in Qatar · <b>AY 2026–27</b> · Sunday–Thursday week, holidays and schedule swaps built in</p>
+    <div id="status"></div>
+  </div>
+</header>
+
+<div class="shell">
+
+<section id="sec-term">
+  <h2><span class="n">1</span> Term &amp; meeting pattern</h2>
+  <div class="row">
+    <div>
+      <label>Term</label>
+      <select id="t-term">
+        <option value="fall2026">Fall 2026 (Aug 23 – Dec 3)</option>
+        <option value="spring2027">Spring 2027 (Jan 4 – Apr 22)</option>
+      </select>
+    </div>
+  </div>
+  <label>Meeting days (registrar codes — GU-Q week runs Sunday–Thursday)</label>
+  <div class="daycodes" id="daycodes"></div>
+  <div class="row" style="margin-top:.6rem;">
+    <div><label>Start time</label><input id="t-start" type="time"></div>
+    <div><label>End time</label><input id="t-end" type="time"></div>
+    <div><label>Room / location</label><input id="t-room" type="text" placeholder="0A18"></div>
+  </div>
+  <p class="hint">Structured times feed the .ics calendar export; leave blank for all-day events.</p>
+  <div class="intel" id="intel"><p class="empty">Pick meeting days to see your semester at a glance.</p></div>
+</section>
+
+<section id="sec-course">
+  <h2><span class="n">2</span> Course information</h2>
+  <div class="row">
+    <div style="flex:2;"><label>Course title</label><input id="c-title" type="text" placeholder="Introduction to International Relations"></div>
+  </div>
+  <div class="row">
+    <div><label>Course number</label><input id="c-number" type="text" placeholder="INAF 100"></div>
+    <div><label>Section</label><input id="c-section" type="text" placeholder="70"></div>
+    <div><label>Credits</label><input id="c-credits" type="text" value="3"></div>
+  </div>
+  <label>Course description</label>
+  <textarea id="c-description" placeholder="One or two paragraphs describing the course."></textarea>
+  <h3>Instructor</h3>
+  <div class="row">
+    <div><label>Name</label><input id="c-instructor" type="text" placeholder="Prof. …"></div>
+    <div><label>Email</label><input id="c-email" type="email" placeholder="netid@georgetown.edu"></div>
+  </div>
+  <div class="row">
+    <div><label>Office hours (times)</label><input id="c-officehours" type="text" placeholder="M/W 1:00–2:30 PM, and by appointment"></div>
+    <div><label>Office location / Zoom</label><input id="c-officeloc" type="text" placeholder="Office 1D34 or Zoom link on Canvas"></div>
+  </div>
+</section>
+
+<section id="sec-objectives">
+  <h2><span class="n">3</span> Learning objectives</h2>
+  <p class="hint">"By the end of this course, you should be able to…" — pick observable verbs from the <a href="https://cft.vanderbilt.edu/guides-sub-pages/blooms-taxonomy/" target="_blank" rel="noopener">hierarchy of verbs (Bloom&rsquo;s taxonomy)</a>; "understand" and "appreciate" are hard to assess.</p>
+  <div class="stances" style="margin-bottom:.5rem;">
+    <label><input type="radio" name="obj-mode" value="list"> <span><b>Bulleted list</b> <span class="desc">— one objective per line</span></span></label>
+    <label><input type="radio" name="obj-mode" value="paragraph"> <span><b>Paragraph</b> <span class="desc">— write it as prose</span></span></label>
+  </div>
+  <div id="obj-list-mode">
+    <div id="obj-list"></div>
+    <div class="btnrow"><button onclick="addObjective()">+ Add objective</button></div>
+  </div>
+  <div id="obj-paragraph-mode" style="display:none;">
+    <textarea id="obj-paragraph" placeholder="Describe in a paragraph what students will be able to do by the end of the course."></textarea>
+  </div>
+</section>
+
+<section id="sec-materials">
+  <h2><span class="n">4</span> Course materials</h2>
+  <label>Required and optional readings, and other resources</label>
+  <textarea id="c-materials" placeholder="List required texts, articles (with Canvas/library availability), and any other resources."></textarea>
+</section>
+
+<section id="sec-grading">
+  <h2><span class="n">5</span> Assignments &amp; grading</h2>
+  <h3>Step 1 · Choose your participation approach</h3>
+  <p class="hint">Policy drives weighting, not the other way around. This selector is the same participation policy as in section 8 — change it in either place.</p>
+  <div class="stances" id="participation-picker"></div>
+  <p class="hint" id="participation-sync"></p>
+  <h3>Step 2 · Graded components</h3>
+  <p class="hint">Each component can carry an optional one-line description of what students will actually do.</p>
+  <div id="grading-table"></div>
+  <div class="btnrow"><button onclick="addGradingRow()">+ Add component</button></div>
+  <p class="hint" id="grading-total"></p>
+  <h3>Grading scale</h3>
+  <p class="hint">Georgetown default shown — edit if your scheme differs.</p>
+  <textarea id="c-scale"></textarea>
+</section>
+
+<section id="sec-exams">
+  <h2><span class="n">6</span> Exams</h2>
+  <h3>Midterms &amp; other exams</h3>
+  <div id="midterm-list"></div>
+  <div class="btnrow"><button onclick="addMidterm()">+ Add exam</button></div>
+  <h3>Final exam (optional)</h3>
+  <label class="checklabel" style="margin-top:.5rem;"><input type="checkbox" id="f-enabled"> This course has a scheduled final exam</label>
+  <div id="final-fields" style="display:none;">
+    <div class="row">
+      <div><label>Date (official exam-window days)</label><span id="f-date-slot"></span></div>
+      <div><label>Start</label><input id="f-start" type="time"></div>
+      <div><label>End</label><input id="f-end" type="time"></div>
+    </div>
+    <div class="row">
+      <div><label>Location</label><input id="f-location" type="text" placeholder="TBA — set by registrar"></div>
+      <div><label>Notes</label><input id="f-notes" type="text" placeholder="e.g., cumulative"></div>
+    </div>
+    <p class="hint" id="f-window"></p>
+  </div>
+</section>
+
+<section id="sec-schedule">
+  <h2><span class="n">7</span> Weekly schedule</h2>
+  <p class="hint">One row per meeting, skipping GU-Q holidays automatically. Regenerating keeps topics already typed for dates that still exist. The Jan 4 Sunday-schedule swap is handled for you.</p>
+  <button class="primary" onclick="regenerateSchedule()">Generate / regenerate schedule</button>
+  <div id="schedule-table" style="margin-top:.75rem;"></div>
+</section>
+
+<section id="sec-policies">
+  <h2><span class="n">8</span> Course policies</h2>
+  <p class="hint">Drag a policy block by its ⣿ handle to change the order policies appear in the syllabus.</p>
+  <p class="hint">For each policy area, choose a stance — the Georgetown-vetted sample language drops in below it, ready to edit. Uncheck any block to leave it out. University-mandated blocks are always included but remain editable.</p>
+  <h3>Instructor-choice policies (CNDLS sample language)</h3>
+  <div id="policy-list"></div>
+  <h3>University-mandated blocks (always included)</h3>
+  <div id="mandatory-list"></div>
+</section>
+
+<section id="sec-structure">
+  <h2><span class="n">9</span> Document structure</h2>
+  <p class="hint">Drag to reorder how major sections appear in the generated syllabus. (Policy order is set by dragging blocks in section 8.)</p>
+  <div id="structure-list"></div>
+  <div class="btnrow"><button class="ghost" onclick="resetOrder()">Reset to default order</button></div>
+</section>
+
+<section id="sec-output">
+  <h2><span class="n">10</span> Output</h2>
+  <div class="btnrow">
+    <button class="primary" onclick="renderOutput()">Generate full syllabus</button>
+    <button class="primary" onclick="renderOnePager()">Generate one-pager</button>
+    <button onclick="copyOutput()">Copy to clipboard</button>
+    <button onclick="downloadOutput()">Download .md</button>
+    <button onclick="downloadICS()">Download calendar (.ics)</button>
+    <button onclick="downloadPlanner()">Download course shell (.json)</button>
+  </div>
+  <textarea id="output" readonly placeholder="Click &quot;Generate Markdown&quot; to assemble the course shell."></textarea>
+</section>
+
+<section>
+  <button class="ghost danger" onclick="clearAll()">Clear all saved data</button>
+</section>
+
+<footer>Built for GU-Q faculty · calendar per the confirmed AY 2026–27 academic calendar (June 2025)</footer>
+</div>
+
+<script>
+/* ============================================================
+   GU-Q hardcoded academic calendar, AY 2026–27
+   Day codes: U=Sun(0) M=Mon(1) T=Tue(2) W=Wed(3) R=Thu(4)
+   ============================================================ */
+const TERMS = {
+  fall2026: {
+    label: 'Fall 2026',
+    start: '2026-08-23', end: '2026-12-03',
+    holidays: [
+      {date:'2026-10-11', label:'Fall break'},
+      {date:'2026-10-12', label:'Fall break'},
+      {date:'2026-10-13', label:'Fall break'},
+      {date:'2026-10-14', label:'Fall break'},
+      {date:'2026-10-15', label:'Fall break'}
+    ],
+    swaps: {},   // dateStr -> weekday number the date RUNS AS
+    keyDates: [
+      {date:'2026-08-23', label:'Classes begin; registration changes accepted'},
+      {date:'2026-08-27', label:'Last day for registration changes; last day to withdraw without a W grade'},
+      {date:'2026-10-08', label:'Fall break begins after last class'},
+      {date:'2026-10-18', label:'Classes resume'},
+      {date:'2026-11-19', label:'Last day to withdraw with a grade of W; last day to request pass/fail'},
+      {date:'2026-12-03', label:'Classes end'},
+      {date:'2026-12-05', label:'Study days (Dec 5–7)'},
+      {date:'2026-12-08', label:'Exam days (Dec 8–10 and Dec 12–14)'},
+      {date:'2026-12-17', label:'All grades due by 5pm Doha time'}
+    ]
+  },
+  spring2027: {
+    label: 'Spring 2027',
+    start: '2027-01-04', end: '2027-04-22',
+    holidays: [
+      {date:'2027-02-09', label:'Qatar National Sports Day / Spring break'},
+      {date:'2027-02-10', label:'Spring break'},
+      {date:'2027-02-11', label:'Spring break'},
+      {date:'2027-03-07', label:'Eid al-Fitr break'},
+      {date:'2027-03-08', label:'Eid al-Fitr break'},
+      {date:'2027-03-09', label:'Eid al-Fitr break'},
+      {date:'2027-03-10', label:'Eid al-Fitr break'},
+      {date:'2027-03-11', label:'Eid al-Fitr break'},
+      {date:'2027-03-28', label:'Easter Sunday'}
+    ],
+    swaps: { '2027-01-04': 0 },  // Mon Jan 4 runs on a SUNDAY schedule
+    keyDates: [
+      {date:'2027-01-04', label:'Classes begin — Monday runs on a Sunday schedule'},
+      {date:'2027-01-11', label:'Last day for registration changes; last day to withdraw without a W grade'},
+      {date:'2027-02-08', label:'Spring break begins after last class'},
+      {date:'2027-02-14', label:'Classes resume'},
+      {date:'2027-03-04', label:'Eid break begins after last class'},
+      {date:'2027-04-08', label:'Last day to withdraw with a grade of W; last day to request pass/fail'},
+      {date:'2027-04-22', label:'Classes end'},
+      {date:'2027-04-24', label:'Study days (Apr 24–26)'},
+      {date:'2027-04-27', label:'Exam days (Apr 27–29 and May 1–3)'},
+      {date:'2027-05-06', label:'Commencement'}
+    ]
+  }
+};
+
+const DAYCODES = [
+  {num:0, code:'U', name:'Sun'},
+  {num:1, code:'M', name:'Mon'},
+  {num:2, code:'T', name:'Tue'},
+  {num:3, code:'W', name:'Wed'},
+  {num:4, code:'R', name:'Thu'}
+];
+const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const DEFAULT_SCALE =
+`93–100% = A
+90–92% = A-
+87–89% = B+
+83–86% = B
+80–82% = B-
+77–79% = C+
+73–76% = C
+70–72% = C-
+67–69% = D+
+60–66% = D
+Below 60% = F`;
+
+/* ============================================================
+   Policy library — instructor-choice stances (CNDLS language)
+   Each stance: {id, label, note, text}
+   ============================================================ */
+const POLICY_DEFS = [
+  {
+    id:'ai', title:'Generative AI', defaultOn:true, defaultStance:'stages',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/ai-and-homework-support',
+    stances:[
+      {id:'allow', label:'Allow AI on assignments', note:'AI use expected; disclosure required.',
+       text:'AI text generation tools may be helpful for this course and indeed your future professional lives. Some assignments in this course will require the explicit and intentional use of generative AI. You may use AI iteratively for input, rather than the final product. When using AI tools to supplement your work, include an AI disclosure statement with your assignment: "[insert AI tool here] was used to support my work in x, y, and z ways."'},
+      {id:'stages', label:'Permit AI at certain stages', note:'Ideas and research yes; writing no.',
+       text:'AI tools such as Gemini and Claude may be able to generate ideas/topics for your assignments, formulate structure for your written work, and can even help you find existing research on the topic. These uses are permitted in this course. The writing and revising, however, must be your own; you may not use AI to write any portion of the paper itself, and using AI tools in this way or failing to disclose the use of AI tools will be treated as a case of plagiarism and referred to the Honor Council.'},
+      {id:'object', label:'No AI / conscientious objection', note:'AI use not permitted.',
+       text:'In this course, we prioritize human reflection, critical thinking, and authentic engagement with course concepts. Using AI tools at any stage of your assignments (idea generation, research, outlining, drafting, or revising) makes it difficult to evaluate and respond helpfully to your individual work. Our goal is to build foundational domain expertise and critical skills without relying on AI assistance. As such, AI tool usage is not permitted in this course, and unauthorized use will be treated as an honor code violation.'}
+    ]
+  },
+  {
+    id:'attendance', title:'Attendance & absences', defaultOn:true, defaultStance:'bank',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/attendance-and-absences',
+    stances:[
+      {id:'open', label:'Open policy', note:'Attendance not graded.',
+       text:'I do my best to make sure class sessions are worth attending, but I do not grade students based on your attendance. My expectation is that you can make your own decision about whether coming to our sessions is beneficial to your learning or not.'},
+      {id:'bank', label:'Attendance bank', note:'A set number of free absences, then penalties.',
+       text:'Your presence in class is crucially important. That said, I understand that life can bring surprises, so your first three absences (for whatever reason) will not affect your grade. After three absences, every additional absence (no matter the reason for the absence) will reduce your overall participation grade by one full letter grade.'},
+      {id:'strict', label:'Strict attendance', note:'All unexcused absences penalized.',
+       text:'In-class learning is an essential part of this course, and can\u2019t meaningfully be replaced by reading someone else\u2019s session notes or asking for a review of the session in office hours. All absences, aside from University-approved excused absences (e.g., religious obligations, illness/injury verified with a doctor\u2019s note), will lead to a one-third grade reduction in a student\u2019s participation grade (e.g., from an A to an A-). Exams missed due to an excused absence will need to be arranged (in advance, whenever realistically possible) with the professor. Students who accumulate more than six absences in the course for any reason will not receive credit for the course.'}
+    ]
+  },
+  {
+    id:'participation', title:'Participation', defaultOn:true, defaultStance:'mandatory',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/participation',
+    stances:[
+      {id:'notexpected', label:'Not expected', note:'Participation not graded or tracked.',
+       text:'This course is designed for you to jump in with questions if you have them\u2014and I\u2019m available to meet with you in office hours\u2014but participation during class will not be graded or tracked. I expect you to engage with the course material, and with me and other students, to the extent you think it will help your learning.'},
+      {id:'encouraged', label:'Encouraged', note:'Encouraged but not graded.',
+       text:'Participation and contribution are strongly encouraged throughout the course. In-class contribution, participation, and student engagement in courses are associated with improved learning, retention, and sense of belonging; thus, participation can be a tremendous asset to our collective learning and class climate.'},
+      {id:'mandatory', label:'Mandatory & graded', note:'In-class work graded.',
+       text:'Given the interactive style of this class, participation will be crucial to learning and your success in the course. Attendance is particularly important also because in-class assignments and discussion will be a critical component for your learning and grade. As such, each in-class assignment will be graded for both content accuracy and contribution, and that will take the place of a traditional participation grade.'},
+      {id:'rubric', label:'Rubric-graded', note:'Graded against a stated rubric.',
+       text:'Participation in this course will be directly measured, including synchronous contributions (e.g., asking questions and engaging in discussion) and asynchronous contributions (e.g., to Canvas discussion boards). These contributions will be graded for quality and quantity using the rubric provided on Canvas.'}
+    ]
+  },
+  {
+    id:'collab', title:'Collaboration', defaultOn:true, defaultStance:'specific',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/collaboration',
+    stances:[
+      {id:'open', label:'Open collaboration', note:'Students decide when to collaborate.',
+       text:'Collaboration is absolutely allowed in this course. I leave it to you to decide whether or not it will be helpful to work with other students on your various class projects. In the work world, we often have to make a judgment call about whether to involve others or not, and this class will give you the opportunity to experiment with this.'},
+      {id:'builtin', label:'Built-in collaboration', note:'Group work by design.',
+       text:'The nature of this course requires a collaborative work environment. Given our focus, all assignments must be conducted collaboratively. Some will be assignments in pre-assigned groups (on Canvas) and others will be randomized. Please remember to include the names of all group members on each submission.'},
+      {id:'specific', label:'Permitted on specific assignments', note:'Assignment instructions specify.',
+       text:'Collaboration is crucial to the learning process and our course\u2019s objectives. In-class assignments and larger assignments on Canvas will specify whether the work should be done collaboratively, in pairs, or individually. Please be intentional: if a submission should be done individually, submit only that which is exclusively your work (with appropriate citations, of course). For collaborative assignments, you will be randomly placed in groups unless otherwise specified; please remember to include the full name of each group member on assignments.'},
+      {id:'none', label:'No collaboration', note:'All work individual.',
+       text:'Your performance in this course is based entirely on individual contribution. Any work completed with others or by others and submitted as your own will be considered a violation of academic integrity and referred to the Honor Council.'}
+    ]
+  },
+  {
+    id:'deadlines', title:'Deadlines & late work', defaultOn:true, defaultStance:'makeup',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/deadlines-and-flexibility',
+    stances:[
+      {id:'revision', label:'Fixed deadlines, revision allowed', note:'Resubmission toward mastery.',
+       text:'Students should make every effort to submit their assignments and materials on time in order to ensure prompt feedback and grading. However, we are all human and things happen. If you feel at any point that you are overwhelmed with deadlines or are falling behind, please reach out as soon as possible. Please note that for most assignments (but not quizzes and exams) you are permitted to resubmit twice in order to utilize the feedback to move toward mastery of the material and improve your overall grade, if desired. Resubmissions must be submitted within two weeks of the original deadline (or before the penultimate day of class) in order to ensure they get re-graded.'},
+      {id:'flex', label:'Fixed deadlines with defined flexibility', note:'Grace window, then deductions.',
+       text:'Students should make every effort to submit their assignments and materials on time in order to ensure prompt feedback and grading. In the event that a deadline is missed or going to be missed, please reach out so we can discuss make-up assignments and set new timelines. In the event that a deadline is missed by three days or more, one grade-point deduction (e.g., B to C) will be applied for each day over the deadline. If you feel at any point that you are overwhelmed with deadlines or are falling behind, please reach out as soon as possible.'},
+      {id:'makeup', label:'Set deadlines with make-up policy', note:'Case-by-case make-ups.',
+       text:'Students should make every effort to submit their assignments and materials on time in order to ensure prompt feedback and grading. However, we are all human and things happen. In the event that a deadline is missed or going to be missed, please reach out so we can discuss make-up assignments and set new timelines. If you feel at any point that you are overwhelmed with deadlines or are falling behind, please reach out as soon as possible.'},
+      {id:'strict', label:'Firm deadlines, no late work', note:'Late work always penalized.',
+       text:'Given the nature of this course and its assignments, deadlines are fixed and non-negotiable. Students are responsible for submitting all assignments at the allocated time. No make-up work or grading will be offered. University-approved absences must be shared with the faculty member ahead of time and accounted for in the submission deadline.'}
+    ]
+  },
+  {
+    id:'communication', title:'Communication', defaultOn:true, defaultStance:'boundaries',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/communication-preferences',
+    stances:[
+      {id:'formal', label:'Formal', note:'Professional email standards expected.',
+       text:'Between class sessions, I will be most easily reached via email. In sending me an email, please consider this a formal interaction. Begin with "Dear Professor X," articulate your question or other content in full, grammatical sentences, and end with a traditional close and your name.'},
+      {id:'informal', label:'Informal', note:'Polite but relaxed.',
+       text:'I\u2019m eager to hear from you between class sessions if you have any questions or other things you want to communicate to me. Email will be the best way to reach me, and don\u2019t worry about formality or titles or that kind of thing, as long as you\u2019re polite\u2014just be in touch!'},
+      {id:'boundaries', label:'With response boundaries', note:'Sets expected response times.',
+       text:'Like you, I have a full life beyond this course, and so may not always be able to respond to emails immediately. In general, I am only on my GU email account on weekdays from 9am\u20135pm. Not counting weekends, I will endeavor to respond to you within 48 hours. Please note that emailing me right before an exam or major assignment may not guarantee feedback or a response in time to impact your work, so please plan your time accordingly.'}
+    ]
+  },
+  {
+    id:'technology', title:'Technology use', defaultOn:true, defaultStance:'open',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/technology-use',
+    stances:[
+      {id:'none', label:'No devices', note:'Notes by hand; ARC exceptions.',
+       text:'Research shows that use of cell phones, laptops, and other devices causes distraction and impairs learning not only for the person using the technology but also for people near the person using the technology. Therefore, no technology use of this kind is permitted during class sessions. Plan to take notes by hand, and bring hard copies of the readings to class. Note: if you have accommodation needs around technology that have been registered with the Academic Resource Center, let me know.'},
+      {id:'situational', label:'Situational', note:'Allowed at instructor-set times.',
+       text:'Technology (laptops, tablets, phones) may be used in class only at specific times and for specific activities set by the instructor. Outside of those moments, please keep devices stowed so we can give the discussion our full attention. If you have accommodation needs around technology registered with the Academic Resource Center, let me know.'},
+      {id:'open', label:'Open use', note:'Trust-based; stay on task.',
+       text:'We are all adults in this classroom community, and I trust you to know when you need to use technological support such as laptops or cell phones during class. Feel free to use these devices if/when it feels appropriate to you, but know that I will expect you to be on task throughout the class session. Use of technology for non-class-related activities is prohibited.'}
+    ],
+    sub:{
+      title:'Wearable smart devices (addendum)',
+      options:[
+        {id:'none', label:'No separate wearables language', note:'Covered implicitly by the main policy.', text:''},
+        {id:'strict', label:'Stowed by default', note:'Same rules as laptops/phones.',
+         text:'Wearable AI devices, including smart eyewear, audio-recording wearables, and smartwatches, are subject to the same academic integrity and recording policies that govern laptops and smartphones in this course. These devices may not be used to capture class discussions, generate or retrieve responses during in-class work, or assist on quizzes, exams, or other assessments. Unless I have explicitly built a device into a class activity, wearables should be removed or powered down before class begins. During assessments, all wearables must be stowed with your other belongings. Using one during an assessment will be treated as unauthorized assistance under the university\u2019s academic integrity policy.'},
+        {id:'accommodating', label:'Stowed, with private accommodation path', note:'Invites confidential conversations.',
+         text:'Wearable AI devices, including smart eyewear, audio-recording wearables, and smartwatches, fall under the same academic integrity and recording policies as laptops and smartphones in this course. By default, they may not be used to capture class discussions, generate or retrieve responses during in-class work, or assist on assessments. I recognize that some of you rely on wearables for reasons that have nothing to do with coursework: health monitoring, hearing support, captioning, note-taking, or an accommodation you would rather not announce to the room. If that describes you, come talk with me in the first two weeks, or whenever the need arises, and we will work out what makes sense. You do not need to disclose more than you are comfortable sharing. If you are registered with the Academic Resource Center, that letter is sufficient, and no further conversation is required. What I ask is that the conversation happen before the device is in use, not after a question comes up during an exam.'}
+      ]
+    }
+  },
+  {
+    id:'recording', title:'Class recording', defaultOn:true, defaultStance:'restricted',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/recording',
+    stances:[
+      {id:'universal', label:'Sessions recorded (access & pedagogy)', note:'Instructor records; sharing prohibited.',
+       text:'To support your learning and provide equitable access to course content, please be advised that our class sessions will be recorded. These recordings are intended for educational purposes only and are strictly for the use of students currently enrolled in this section. To protect the privacy of your peers and maintain an environment of open intellectual exchange, you may not share, download (unless permitted), or post these recordings to any external site or social media platform. Your continued participation in class after receiving this notice constitutes your acknowledgment of this practice. Unauthorized recording or dissemination of class content is a violation of University Policy and may be referred for disciplinary review.'},
+      {id:'restricted', label:'Restricted recording', note:'Students may not record; ARC exceptions.',
+       text:'To protect the privacy of your peers and maintain an environment of open intellectual exchange, students are not permitted to record (audio or video) any part of our class sessions. This includes the use of transcription software or AI assistants. Exception for approved accommodations: students with a disability-related recording accommodation approved by the Academic Resource Center (ARC) are permitted to record solely for their personal study. Unauthorized recording or dissemination of class content is a violation of University Policy and may be referred for disciplinary review.'}
+    ]
+  },
+  {
+    id:'virtual', title:'Virtual attendance', defaultOn:false, defaultStance:'norequests',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/virtual-attendance',
+    stances:[
+      {id:'requests', label:'By request', note:'Zoom link on request.',
+       text:'Given the importance of contribution and group work in this class, in-person attendance should be a priority. However, if you cannot make it in person, a Zoom link can be made available upon request for you to join virtually.'},
+      {id:'norequests', label:'Not available', note:'No virtual attendance.',
+       text:'Given the importance of contribution and group work in this class, in-person attendance should be a priority. Virtual attendance is not available for this class. If you must miss class, you have a responsibility to seek class notes and review course content for the missed time. Office hours are available to address any outstanding questions.'},
+      {id:'recordings', label:'Recordings on request', note:'No Zoom, but recordings possible.',
+       text:'Virtual attendance is not permitted for this class. If a session is missed, a recording may be provided upon request.'},
+      {id:'observe', label:'Virtual observation', note:'Watch, limited participation.',
+       text:'Virtual attendance is regularly available for this class, technology permitting. A Zoom link will be provided on Canvas for every class. Students may or may not be able to unmute or ask questions in the moment, depending on class constraints, but always feel free to reach out to me afterwards if you have any questions.'},
+      {id:'hybrid', label:'Hybrid engagement', note:'Full remote participation.',
+       text:'Hybrid/virtual attendance is regularly available for this class. Every effort will be made to include you in class discussion and activities, technology permitting.'}
+    ]
+  },
+  {
+    id:'continuity', title:'Instructional continuity', defaultOn:true, defaultStance:'sync',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/instructional-continuity',
+    stances:[
+      {id:'sync', label:'Synchronous (Zoom)', note:'Class moves to Zoom if campus closes.',
+       text:'If meeting in person is impossible for a given session (e.g., if the campus is closed), we will meet virtually at the Zoom link posted on Canvas.'},
+      {id:'async', label:'Asynchronous', note:'Alternate activities via Canvas/email.',
+       text:'If meeting in person is impossible for a given session (e.g., if the campus is closed), I will contact you via email to tell you what activities you\u2019ll need to do to keep up with class. This may involve Canvas discussions, emailed reading responses, collaborative work with other students in Google Docs, or other activities, depending on the nature of the session that\u2019s been canceled.'}
+    ]
+  },
+  {
+    id:'officehours', title:'Office hours', defaultOn:true, defaultStance:'open',
+    url:'https://cndls.georgetown.edu/resources/syllabus-policies/office-hours',
+    stances:[
+      {id:'open', label:'Open office hours', note:'Come anytime, no requirement.',
+       text:'You are always welcome to attend office hours, as many times as you like, individually or in groups, whether to talk about course material, the discipline more widely, or career thoughts\u2014or just as an opportunity for us to get to know each other better. I am very happy to talk to students during office hours! My office hours are {{OH}}. Please contact me if those times collide with other courses or responsibilities for you and we can work on finding another time.'},
+      {id:'required', label:'Required meeting', note:'One required visit early in term.',
+       text:'In addition to my regularly scheduled, and open, office hours ({{OH}})\u2014I will always be happy to see you!\u2014I am requiring each student to have a 20-minute (or longer) meeting with me within the first three weeks of the course. We\u2019ll use this time to get to know one another, and in particular for me to field any questions you might have about the course and for me to learn about your goals for the experience. I look forward to seeing you!'}
+    ]
+  }
+];
+
+/* ============================================================
+   University-mandated blocks (always included, editable)
+   ============================================================ */
+const MANDATORY_DEFS = [
+  {id:'integrity', title:'Academic Integrity & the Honor Code',
+   url:'https://honorcouncil.georgetown.edu/system/policies',
+   text:'Students at Georgetown University are expected to maintain the highest standards of academic and personal integrity. Academic dishonesty in any form is a serious offense, and students found in violation are subject to academic penalties that include, but are not limited to, failure of the course, termination from the program, and revocation of degrees already conferred. All students are expected to fully adhere to the policies and procedures of Georgetown\u2019s Honor System and to take the Honor Code Pledge:\n\n"In pursuit of the high ideals and rigorous standards of academic life I commit myself to respect and to uphold the Georgetown University honor system: to be honest in every academic endeavor, and to conduct myself honorably, as a responsible member of the Georgetown community as we live and work together."\n\nAll submissions must be your original work. The Georgetown University Honor System defines plagiarism as "the act of passing off as one\u2019s own the ideas or writings of another." Any submission suspected of plagiarism will be referred to the Honor Council for investigation and possible adjudication. Note the Honor Council\u2019s Standards of Conduct on AI-generated work: if you didn\u2019t generate the words yourself, say so by quoting and citing the source; if you generated the words but not the content and ideas, say so by citing the source. Whether AI-generated work is allowed at all is governed by the course policy above.'},
+  {id:'accommodations', title:'Students with Disabilities & Accommodations',
+   url:'https://academicsupport.georgetown.edu/',
+   text:'Under the Americans with Disabilities Act (ADA) and the Rehabilitation Act of 1973, individuals with disabilities have the right to specific accommodations that do not fundamentally alter the nature of the course. Students are responsible for communicating their needs to the Academic Resource Center (202-687-8354; arc@georgetown.edu), the office that oversees disability support services, before the start of classes to allow time to review the documentation and make recommendations for appropriate accommodations. The University is not responsible for making special accommodations for students who have not declared their disabilities and have not requested an accommodation in a timely manner. For the most current policy information, please refer to the Georgetown University Academic Resource Center website.'},
+  {id:'inclusion', title:'Accessibility & Inclusion',
+   url:'https://cndls.georgetown.edu/resources/syllabus-policies/gu-policies',
+   text:'One of the central tenets of Georgetown\u2019s educational mission is cura personalis, a Latin phrase meaning "care of the whole person." I am committed to creating a learning environment that supports a diversity of thoughts, perspectives, and experiences, and honors your identities. If your name or pronoun needs to be corrected, please let me know early in the semester so that I can make the appropriate changes to my records.'},
+  {id:'titleix', title:'Title IX / Sexual Misconduct',
+   url:'https://facultyhandbook.georgetown.edu/section4/j/',
+   text:'Georgetown University and its faculty are committed to supporting survivors and those impacted by sexual misconduct, which includes sexual assault, sexual harassment, relationship violence, and stalking. Georgetown requires faculty members, unless otherwise designated as confidential, to report all disclosures of sexual misconduct to the University Title IX Coordinator or a Deputy Title IX Coordinator. If you disclose an incident of sexual misconduct to a professor in or outside of the classroom (with the exception of disclosures in papers), that faculty member must report the incident to the Title IX Coordinator or Deputy Title IX Coordinator, who will in turn reach out to the student to provide support, resources, and the option to meet. The student is not required to meet with the Title IX coordinator. If you would prefer to speak to someone confidentially, Georgetown has fully confidential professional resources, including Health Education Services for Sexual Assault Response and Prevention (confidential email: sarp@georgetown.edu) and Counseling and Psychiatric Services (CAPS: 202-687-6985). More information about reporting options and resources can be found on the Sexual Misconduct Resource Center website. Georgetown is also committed to creating an accessible and inclusive environment for pregnant and parenting students; students seeking a pregnancy adjustment or accommodation should follow the process laid out on the Title IX at Georgetown website.'},
+  {id:'support', title:'Support Services',
+   url:'https://cndls.georgetown.edu/resources/syllabus-policies/gu-policies',
+   text:'Resources available to you include: Academic Resource Center (202-687-8354, arc@georgetown.edu); Counseling and Psychiatric Services (202-687-6985); Institutional Diversity, Equity & Affirmative Action (202-687-4798); the Georgetown Library and its eResources (500+ research databases, 1.5+ million ebooks); the Writing Center (peer tutoring at any stage of the writing process); and the Office of the Student Ombuds (studentombuds@georgetown.edu, 202-784-1081) \u2014 a confidential, independent, impartial, and informal space to discuss University-related concerns. All students have 24/7 access to Canvas technical support via the Help icon in Canvas or the support hotline at 855-338-2770.'}
+];
+
+/* ============================================================
+   State & persistence
+   ============================================================ */
+const STORAGE_KEY = 'guq-syllabus-state';
+let saveTimer = null;
+
+const SECTION_DEFS = {
+  info:{label:'Course Information'},
+  description:{label:'Course Description'},
+  objectives:{label:'Learning Objectives'},
+  materials:{label:'Course Materials'},
+  grading:{label:'Assignments & Grading'},
+  exams:{label:'Exams'},
+  keydates:{label:'Important Dates'},
+  schedule:{label:'Course Schedule'},
+  policies:{label:'Course Policies'},
+  university:{label:'University Policies & Resources'}
+};
+const DEFAULT_SECTION_ORDER = Object.keys(SECTION_DEFS);
+const DEFAULT_POLICY_ORDER = ['ai','participation','attendance','collab','deadlines','communication','technology','recording','virtual','continuity','officehours'];
+
+function defaultState(){
+  return {
+    term:'fall2026',
+    days:[0,2],           // U/T default
+    times:{start:'',end:''}, room:'',
+    exams:{ midterms:[], final:{enabled:false,date:'',start:'',end:'',location:'',notes:''} },
+    sectionOrder: DEFAULT_SECTION_ORDER.slice(),
+    policyOrder: DEFAULT_POLICY_ORDER.slice(),
+    course:{title:'',number:'',section:'',credits:'3',description:'',
+            instructor:'',email:'',officeHours:'',officeLoc:''},
+    objectives:['',''],
+    objectivesMode:'paragraph',
+    objectivesText:'',
+    materials:'',
+    grading:[{component:'Participation & in-class work',percent:20,desc:''},
+             {component:'Midterm exam',percent:25,desc:''},
+             {component:'Research paper',percent:30,desc:''},
+             {component:'Final exam',percent:25,desc:''}],
+    scale: DEFAULT_SCALE,
+    schedule:[],
+    policies:{},   // id -> {included, stance, text}
+    mandatory:{}   // id -> text
+  };
+}
+let state = defaultState();
+initPolicyState(state);
+
+function initPolicyState(s){
+  POLICY_DEFS.forEach(function(p){
+    if(!s.policies[p.id]){
+      var st = p.stances.find(function(x){return x.id===p.defaultStance;}) || p.stances[0];
+      s.policies[p.id] = {included:p.defaultOn, stance:st.id, text:st.text};
+    }
+  });
+  MANDATORY_DEFS.forEach(function(m){
+    if(s.mandatory[m.id]===undefined) s.mandatory[m.id]=m.text;
+  });
+  if(!Array.isArray(s.policyOrder) || !s.policyOrder.length) s.policyOrder = DEFAULT_POLICY_ORDER.slice();
+  POLICY_DEFS.forEach(function(p){ if(s.policyOrder.indexOf(p.id)===-1) s.policyOrder.push(p.id); });
+  s.policyOrder = s.policyOrder.filter(function(id){ return POLICY_DEFS.some(function(p){return p.id===id;}); });
+  var techDef = POLICY_DEFS.find(function(p){return p.id==='technology';});
+  var tp = s.policies.technology;
+  if(tp && tp.subStance===undefined){
+    if(s.policies.wearables && s.policies.wearables.included){
+      tp.subStance = s.policies.wearables.stance || 'strict';
+      var opt = techDef.sub.options.find(function(o){return o.id===tp.subStance;});
+      tp.subText = s.policies.wearables.text || (opt?opt.text:'');
+    }else{
+      tp.subStance = 'none'; tp.subText = '';
+    }
+  }
+  delete s.policies.wearables;
+  if(!Array.isArray(s.sectionOrder) || !s.sectionOrder.length) s.sectionOrder = DEFAULT_SECTION_ORDER.slice();
+  s.sectionOrder = s.sectionOrder.filter(function(id){ return SECTION_DEFS[id]; });
+  DEFAULT_SECTION_ORDER.forEach(function(id){ if(s.sectionOrder.indexOf(id)===-1) s.sectionOrder.push(id); });
+  if(!s.times) s.times = {start:'',end:''};
+  if(!s.objectivesMode) s.objectivesMode = (s.objectives && s.objectives.some(function(o){return o&&o.trim();})) ? 'list' : 'paragraph';
+  if(s.objectivesText===undefined) s.objectivesText = '';
+  if(!s.exams) s.exams = { midterms:[], final:{enabled:false,date:'',start:'',end:'',location:'',notes:''} };
+}
+
+/* storage adapter: artifact window.storage -> localStorage -> memory */
+const store = {
+  async get(){
+    try{
+      if(window.storage && window.storage.get){
+        const r = await window.storage.get(STORAGE_KEY,false);
+        return r && r.value ? r.value : null;
+      }
+    }catch(e){}
+    try{ return localStorage.getItem(STORAGE_KEY); }catch(e){ return null; }
+  },
+  async set(v){
+    try{
+      if(window.storage && window.storage.set){ await window.storage.set(STORAGE_KEY,v,false); return true; }
+    }catch(e){}
+    try{ localStorage.setItem(STORAGE_KEY,v); return true; }catch(e){ return false; }
+  },
+  async del(){
+    try{ if(window.storage && window.storage.delete){ await window.storage.delete(STORAGE_KEY,false); } }catch(e){}
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
+};
+
+async function loadState(){
+  try{
+    const raw = await store.get();
+    if(raw){
+      const loaded = JSON.parse(raw);
+      state = Object.assign(defaultState(), loaded);
+      state.course = Object.assign(defaultState().course, loaded.course||{});
+      initPolicyState(state);
+    }
+  }catch(e){}
+  renderAll();
+}
+function saveState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async function(){
+    const ok = await store.set(JSON.stringify(state));
+    const s = document.getElementById('status');
+    s.textContent = ok ? 'Saved' : 'Save failed \u2014 changes may not persist';
+    setTimeout(function(){ if(s.textContent==='Saved') s.textContent=''; },1500);
+  },500);
+}
+async function clearAll(){
+  if(!confirm('Clear all saved course info, schedule, and policy edits?')) return;
+  await store.del();
+  state = defaultState(); initPolicyState(state);
+  renderAll();
+}
+
+/* ============================================================
+   Date helpers
+   ============================================================ */
+function parseDate(s){ return new Date(s+'T00:00:00'); }
+function fmtDate(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function sundayOf(d){ const s=new Date(d); s.setDate(d.getDate()-d.getDay()); s.setHours(0,0,0,0); return s; }
+function weekOf(dateStr){
+  const t = TERMS[state.term];
+  const anchor = sundayOf(parseDate(t.start));
+  return Math.floor((parseDate(dateStr)-anchor)/(7*86400000))+1;
+}
+function prettyDate(dateStr){
+  return parseDate(dateStr).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+}
+
+/* effective weekday for scheduling: honors swap days */
+function effectiveDay(dateStr){
+  const t = TERMS[state.term];
+  if(t.swaps.hasOwnProperty(dateStr)) return t.swaps[dateStr];
+  return parseDate(dateStr).getDay();
+}
+
+/* compute all meeting dates for current term+days */
+function meetingDates(){
+  const t = TERMS[state.term];
+  const holidaySet = {};
+  t.holidays.forEach(function(h){ holidaySet[h.date]=h.label; });
+  const out = [], skipped = [], swapped = [];
+  let d = parseDate(t.start); const end = parseDate(t.end);
+  while(d<=end){
+    const ds = fmtDate(d);
+    const eff = effectiveDay(ds);
+    if(state.days.includes(eff)){
+      if(holidaySet[ds]) skipped.push({date:ds,label:holidaySet[ds]});
+      else{
+        out.push(ds);
+        if(t.swaps.hasOwnProperty(ds)) swapped.push(ds);
+      }
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return {dates:out, skipped:skipped, swapped:swapped};
+}
+
+/* ============================================================
+   Section 1: term, day picker, intel panel
+   ============================================================ */
+function renderDayCodes(){
+  const wrap = document.getElementById('daycodes');
+  wrap.innerHTML='';
+  DAYCODES.forEach(function(dc){
+    const b = document.createElement('div');
+    b.className = 'daycode'+(state.days.includes(dc.num)?' on':'');
+    b.setAttribute('role','button'); b.tabIndex=0;
+    b.innerHTML = '<span class="code">'+dc.code+'</span><span class="name">'+dc.name+'</span>';
+    function toggle(){
+      const i = state.days.indexOf(dc.num);
+      if(i>-1) state.days.splice(i,1); else state.days.push(dc.num);
+      state.days.sort();
+      renderDayCodes(); renderIntel(); saveState();
+    }
+    b.onclick = toggle;
+    b.onkeydown = function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } };
+    wrap.appendChild(b);
+  });
+}
+function renderIntel(){
+  const el = document.getElementById('intel');
+  const t = TERMS[state.term];
+  if(!state.days.length){
+    el.innerHTML = '<p class="empty">Pick meeting days to see your semester at a glance.</p>'; return;
+  }
+  const m = meetingDates();
+  let html = '<p><span class="count">'+m.dates.length+' class meetings</span> \u00b7 '+t.label+' ('+t.start+' \u2192 '+t.end+')</p>';
+  if(m.skipped.length){
+    html += '<p>Skipped for you: '+m.skipped.map(function(s){ return prettyDate(s.date)+' ('+s.label+')'; }).join('; ')+'.</p>';
+  }else{
+    html += '<p>No holidays fall on your meeting days this term.</p>';
+  }
+  m.swapped.forEach(function(ds){
+    html += '<p class="swap">\u26a0 '+prettyDate(ds)+' runs on a '+DAY_NAMES[TERMS[state.term].swaps[ds]]+' schedule \u2014 included because '+DAYCODES.find(function(d){return d.num===TERMS[state.term].swaps[ds];}).code+' is one of your meeting days.</p>';
+  });
+  Object.keys(t.swaps).forEach(function(ds){
+    if(!state.days.includes(t.swaps[ds]) && state.days.includes(parseDate(ds).getDay())){
+      html += '<p class="swap">\u26a0 '+prettyDate(ds)+' is a '+DAY_NAMES[parseDate(ds).getDay()]+' but runs on a '+DAY_NAMES[t.swaps[ds]]+' schedule \u2014 your class does NOT meet that day.</p>';
+    }
+  });
+  el.innerHTML = html;
+}
+function bindTermControls(){
+  const sel = document.getElementById('t-term');
+  sel.value = state.term;
+  sel.onchange = function(){ state.term = sel.value; renderIntel(); saveState(); };
+  const ts = document.getElementById('t-start'); ts.value = state.times.start||'';
+  ts.onchange = function(){ state.times.start = ts.value; saveState(); };
+  const te = document.getElementById('t-end'); te.value = state.times.end||'';
+  te.onchange = function(){ state.times.end = te.value; saveState(); };
+  const room = document.getElementById('t-room'); room.value = state.room;
+  room.oninput = function(){ state.room = room.value; saveState(); };
+}
+
+/* ============================================================
+   Section 2: course info
+   ============================================================ */
+const COURSE_FIELDS = [
+  ['c-title','title'],['c-number','number'],['c-section','section'],['c-credits','credits'],
+  ['c-description','description'],['c-instructor','instructor'],['c-email','email'],
+  ['c-officehours','officeHours'],['c-officeloc','officeLoc']
+];
+function bindCourseFields(){
+  COURSE_FIELDS.forEach(function(pair){
+    const el = document.getElementById(pair[0]);
+    el.value = state.course[pair[1]]||'';
+    el.oninput = function(){ state.course[pair[1]]=el.value; saveState(); };
+  });
+  const mat = document.getElementById('c-materials');
+  mat.value = state.materials||'';
+  mat.oninput = function(){ state.materials = mat.value; saveState(); };
+  const sc = document.getElementById('c-scale');
+  sc.value = state.scale || DEFAULT_SCALE;
+  sc.oninput = function(){ state.scale = sc.value; saveState(); };
+}
+
+/* ============================================================
+   Section 3: objectives
+   ============================================================ */
+function addObjective(){ state.objectives.push(''); renderObjectives(); saveState(); }
+function renderObjectives(){
+  document.querySelectorAll('input[name="obj-mode"]').forEach(function(r){
+    r.checked = (r.value===state.objectivesMode);
+    r.onchange = function(){ state.objectivesMode = r.value; renderObjectives(); saveState(); };
+  });
+  document.getElementById('obj-list-mode').style.display = state.objectivesMode==='list' ? 'block' : 'none';
+  document.getElementById('obj-paragraph-mode').style.display = state.objectivesMode==='paragraph' ? 'block' : 'none';
+  const ta = document.getElementById('obj-paragraph');
+  ta.value = state.objectivesText||'';
+  ta.oninput = function(){ state.objectivesText = ta.value; saveState(); };
+  const wrap = document.getElementById('obj-list');
+  wrap.innerHTML='';
+  state.objectives.forEach(function(o,i){
+    const div = document.createElement('div');
+    div.className='list-item';
+    div.innerHTML = '<div class="top"><input type="text" style="flex:1;border:none;background:transparent;padding:.2rem;" placeholder="e.g., Evaluate competing theories of \u2026" value="'+escapeAttr(o)+'"><button class="ghost danger">\u00d7</button></div>';
+    div.querySelector('input').oninput = function(e){ state.objectives[i]=e.target.value; saveState(); };
+    div.querySelector('button').onclick = function(){ state.objectives.splice(i,1); renderObjectives(); saveState(); };
+    wrap.appendChild(div);
+  });
+}
+
+/* ============================================================
+   Section 5: grading
+   ============================================================ */
+function addGradingRow(){ state.grading.push({component:'',percent:0,desc:''}); renderGrading(); saveState(); }
+function renderParticipationPicker(){
+  const wrap = document.getElementById('participation-picker');
+  const p = POLICY_DEFS.find(function(x){return x.id==='participation';});
+  const ps = state.policies.participation;
+  wrap.innerHTML='';
+  p.stances.forEach(function(s){
+    const lab = document.createElement('label');
+    lab.innerHTML = '<input type="radio" name="pp-grading" value="'+s.id+'" '+(ps.stance===s.id?'checked':'')+'>'+
+      '<span><b>'+s.label+'</b> <span class="desc">\u2014 '+s.note+'</span></span>';
+    lab.querySelector('input').onchange = function(){
+      ps.stance = s.id; ps.text = s.text; ps.included = true;
+      ensureParticipationRow();
+      renderParticipationPicker(); renderGrading(); renderPolicies(); saveState();
+    };
+    wrap.appendChild(lab);
+  });
+  updateParticipationSync();
+}
+function participationRow(){
+  return state.grading.find(function(g){ return /particip/i.test(g.component||''); });
+}
+function ensureParticipationRow(){
+  const st = state.policies.participation.stance;
+  if((st==='mandatory'||st==='rubric') && !participationRow()){
+    state.grading.unshift({component:'Participation & in-class work',percent:0,desc:''});
+  }
+}
+function updateParticipationSync(){
+  const el = document.getElementById('participation-sync');
+  const st = state.policies.participation.stance;
+  const row = participationRow();
+  if((st==='notexpected'||st==='encouraged') && row && Number(row.percent)>0){
+    el.innerHTML = '<span class="warn">\u26a0 Your participation policy says it isn\u2019t graded, but "'+row.component+'" carries '+row.percent+'%. Reconcile one or the other.</span>';
+  }else if((st==='mandatory'||st==='rubric') && row && Number(row.percent)===0){
+    el.innerHTML = '<span class="warn">\u26a0 Participation is graded under this policy \u2014 give "'+row.component+'" a weight below.</span>';
+  }else if((st==='mandatory'||st==='rubric') && !row){
+    el.innerHTML = '<span class="warn">\u26a0 Participation is graded under this policy but no participation component exists.</span>';
+  }else{
+    el.innerHTML = '<span class="ok">\u2713 Policy and weights are consistent.</span>';
+  }
+}
+function renderGrading(){
+  const wrap = document.getElementById('grading-table');
+  if(!state.grading.length){ wrap.innerHTML='<p class="empty">No components yet.</p>'; updateGradingTotal(); updateParticipationSync(); return; }
+  let html = '<table><thead><tr><th>Component</th><th style="width:5.5rem;">Weight %</th><th></th></tr></thead><tbody>';
+  state.grading.forEach(function(g,i){
+    html += '<tr><td><input type="text" data-i="'+i+'" data-f="component" value="'+escapeAttr(g.component)+'" placeholder="e.g., Midterm exam"></td>'+
+            '<td><input type="number" min="0" max="100" data-i="'+i+'" data-f="percent" value="'+g.percent+'"></td>'+
+            '<td><button class="ghost danger" data-remove="'+i+'">\u00d7</button></td></tr>'+
+            '<tr><td colspan="3"><input type="text" data-i="'+i+'" data-f="desc" value="'+escapeAttr(g.desc||'')+'" placeholder="Optional: brief description of what students will do" style="font-size:.78rem;color:var(--gu-gray);"></td></tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('input[data-i]').forEach(function(inp){
+    inp.oninput = function(){
+      const i=+inp.dataset.i, f=inp.dataset.f;
+      state.grading[i][f] = f==='percent' ? Number(inp.value) : inp.value;
+      updateGradingTotal(); updateParticipationSync(); saveState();
+    };
+  });
+  wrap.querySelectorAll('button[data-remove]').forEach(function(btn){
+    btn.onclick = function(){ state.grading.splice(+btn.dataset.remove,1); renderGrading(); saveState(); };
+  });
+  updateGradingTotal(); updateParticipationSync();
+}
+function updateGradingTotal(){
+  const total = state.grading.reduce(function(s,g){ return s+Number(g.percent||0); },0);
+  const el = document.getElementById('grading-total');
+  if(!state.grading.length){ el.textContent=''; return; }
+  el.innerHTML = total===100 ? '<span class="ok">Total: 100% \u2713</span>'
+                             : '<span class="warn">Total: '+total+'% (doesn\u2019t add to 100)</span>';
+}
+
+/* ============================================================
+   Exams — with official GU-Q exam-window validation
+   ============================================================ */
+const EXAM_WINDOWS = {
+  fall2026:[['2026-12-08','2026-12-10'],['2026-12-12','2026-12-14']],
+  spring2027:[['2027-04-27','2027-04-29'],['2027-05-01','2027-05-03']]
+};
+function fmtTime(t){
+  if(!t) return '';
+  const parts = t.split(':'); let h = +parts[0]; const m = parts[1];
+  const ap = h>=12 ? 'PM' : 'AM'; h = h%12; if(h===0) h=12;
+  return h+':'+m+' '+ap;
+}
+function meetTimeStr(){
+  if(!state.times.start) return '';
+  return fmtTime(state.times.start)+(state.times.end?'\u2013'+fmtTime(state.times.end):'');
+}
+function inExamWindow(ds){
+  return (EXAM_WINDOWS[state.term]||[]).some(function(w){ return ds>=w[0] && ds<=w[1]; });
+}
+function examWindowDates(){
+  const out = [];
+  (EXAM_WINDOWS[state.term]||[]).forEach(function(w){
+    let d = parseDate(w[0]); const end = parseDate(w[1]);
+    while(d<=end){ out.push(fmtDate(d)); d.setDate(d.getDate()+1); }
+  });
+  return out;
+}
+function dateSelect(options, current, onPick){
+  const sel = document.createElement('select');
+  let inList = false;
+  let html = '<option value="">choose\u2026</option>';
+  options.forEach(function(ds){
+    if(ds===current) inList = true;
+    html += '<option value="'+ds+'" '+(ds===current?'selected':'')+'>'+prettyDate(ds)+'</option>';
+  });
+  html += '<option value="__custom" '+(current && !inList?'selected':'')+'>Other date\u2026</option>';
+  sel.innerHTML = html;
+  const custom = document.createElement('input');
+  custom.type = 'date'; custom.value = current && !inList ? current : '';
+  custom.style.display = (current && !inList) ? 'block' : 'none';
+  custom.style.marginTop = '.3rem';
+  sel.onchange = function(){
+    if(sel.value==='__custom'){ custom.style.display='block'; custom.focus(); }
+    else{ custom.style.display='none'; custom.value=''; onPick(sel.value); }
+  };
+  custom.onchange = function(){ onPick(custom.value); };
+  const holder = document.createElement('div');
+  holder.appendChild(sel); holder.appendChild(custom);
+  return holder;
+}
+function addMidterm(){
+  state.exams.midterms.push({label:'Midterm exam',date:'',start:'',end:'',location:'',notes:''});
+  renderExams(); saveState();
+}
+function renderExams(){
+  const wrap = document.getElementById('midterm-list');
+  wrap.innerHTML='';
+  if(!state.exams.midterms.length) wrap.innerHTML='<p class="empty">No midterms or in-term exams added.</p>';
+  const classDates = state.days.length ? meetingDates().dates : [];
+  state.exams.midterms.forEach(function(m,i){
+    const div = document.createElement('div'); div.className='list-item';
+    div.innerHTML =
+      '<div class="row">'+
+        '<div style="flex:2;"><label>Label</label><input type="text" data-f="label" value="'+escapeAttr(m.label)+'"></div>'+
+        '<div><label>Date (from your class meetings)</label><span data-dateslot></span></div>'+
+      '</div>'+
+      '<div class="row">'+
+        '<div><label>Start</label><input type="time" data-f="start" value="'+m.start+'"></div>'+
+        '<div><label>End</label><input type="time" data-f="end" value="'+m.end+'"></div>'+
+        '<div><label>Location</label><input type="text" data-f="location" value="'+escapeAttr(m.location)+'"></div>'+
+      '</div>'+
+      '<p class="hint" data-hint></p>'+
+      '<div class="btnrow"><button class="ghost danger">Remove</button></div>';
+    function hint(){
+      const el = div.querySelector('[data-hint]');
+      if(!m.date){ el.textContent=''; return; }
+      const t = TERMS[state.term];
+      const isHoliday = t.holidays.some(function(h){return h.date===m.date;});
+      const isMeeting = state.days.includes(effectiveDay(m.date));
+      if(isHoliday) el.innerHTML='<span class="warn">\u26a0 That date is a GU-Q holiday ('+t.holidays.find(function(h){return h.date===m.date;}).label+').</span>';
+      else if(!isMeeting) el.innerHTML='<span class="warn">\u26a0 That date isn\u2019t one of your meeting days.</span>';
+      else el.innerHTML='<span class="ok">\u2713 Falls on one of your class meetings.</span>';
+    }
+    div.querySelector('[data-dateslot]').appendChild(
+      dateSelect(classDates, m.date, function(v){ m.date=v; hint(); saveState(); })
+    );
+    div.querySelectorAll('input[data-f]').forEach(function(inp){
+      inp.addEventListener('input',function(){ m[inp.dataset.f]=inp.value; saveState(); });
+    });
+    div.querySelector('button.danger').onclick = function(){ state.exams.midterms.splice(i,1); renderExams(); saveState(); };
+    hint();
+    wrap.appendChild(div);
+  });
+  const f = state.exams.final;
+  const chk = document.getElementById('f-enabled');
+  chk.checked = f.enabled;
+  document.getElementById('final-fields').style.display = f.enabled ? 'block' : 'none';
+  chk.onchange = function(){ f.enabled = chk.checked; renderExams(); saveState(); };
+  const fdWrap = document.getElementById('f-date-slot');
+  fdWrap.innerHTML='';
+  fdWrap.appendChild(dateSelect(examWindowDates(), f.date, function(v){ f.date=v; updateFinalHint(); saveState(); }));
+  [['f-start','start'],['f-end','end'],['f-location','location'],['f-notes','notes']].forEach(function(pair){
+    const el = document.getElementById(pair[0]); el.value = f[pair[1]]||'';
+    el.oninput = function(){ f[pair[1]]=el.value; updateFinalHint(); saveState(); };
+  });
+  updateFinalHint();
+}
+function updateFinalHint(){
+  const el = document.getElementById('f-window'); const f = state.exams.final;
+  if(!f.enabled || !f.date){ el.textContent=''; return; }
+  el.innerHTML = inExamWindow(f.date)
+    ? '<span class="ok">\u2713 Falls inside the official GU-Q exam window.</span>'
+    : '<span class="warn">\u26a0 Outside the official GU-Q exam window for '+TERMS[state.term].label+' \u2014 double-check with the registrar.</span>';
+}
+
+/* ============================================================
+   Drag-and-drop ordering (sections & policy blocks)
+   ============================================================ */
+function makeSortable(container, orderArr, onReorder){
+  let dragIdx = null;
+  Array.prototype.forEach.call(container.children, function(item, idx){
+    item.addEventListener('dragstart', function(e){
+      dragIdx = idx; item.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      try{ e.dataTransfer.setData('text/plain', String(idx)); }catch(err){}
+    });
+    item.addEventListener('dragend', function(){ item.classList.remove('dragging'); });
+    item.addEventListener('dragover', function(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; });
+    item.addEventListener('drop', function(e){
+      e.preventDefault();
+      if(dragIdx===null || dragIdx===idx) return;
+      const moved = orderArr.splice(dragIdx,1)[0];
+      orderArr.splice(idx,0,moved);
+      dragIdx = null;
+      onReorder();
+    });
+  });
+}
+function renderStructure(){
+  const wrap = document.getElementById('structure-list');
+  wrap.innerHTML='';
+  state.sectionOrder.forEach(function(id){
+    const d = SECTION_DEFS[id]; if(!d) return;
+    const chip = document.createElement('div');
+    chip.className='dragchip'; chip.draggable=true;
+    chip.innerHTML = '<span class="draghandle">\u28ff</span>'+d.label;
+    wrap.appendChild(chip);
+  });
+  makeSortable(wrap, state.sectionOrder, function(){ renderStructure(); saveState(); });
+}
+function resetOrder(){
+  state.sectionOrder = DEFAULT_SECTION_ORDER.slice();
+  state.policyOrder = DEFAULT_POLICY_ORDER.slice();
+  renderStructure(); renderPolicies(); saveState();
+}
+
+/* ============================================================
+   Section 7: schedule
+   ============================================================ */
+function regenerateSchedule(){
+  if(!state.days.length){ alert('Select at least one meeting day in section 1 first.'); return; }
+  const m = meetingDates();
+  const oldMap = {};
+  state.schedule.forEach(function(r){ oldMap[r.date]=r; });
+  state.schedule = m.dates.map(function(ds){
+    return oldMap[ds] ? oldMap[ds] : {date:ds, topic:'', reading:''};
+  });
+  renderSchedule(); saveState();
+}
+function renderSchedule(){
+  const wrap = document.getElementById('schedule-table');
+  if(!state.schedule.length){ wrap.innerHTML='<p class="empty">No schedule yet. Set term and days above, then click Generate.</p>'; return; }
+  const t = TERMS[state.term];
+  let lastWeek=null;
+  let html = '<table><thead><tr><th>Wk</th><th>Date</th><th>Topic</th><th>Reading / due</th><th></th></tr></thead><tbody>';
+  state.schedule.forEach(function(row,i){
+    const wk = weekOf(row.date);
+    const wkCell = wk===lastWeek ? '' : wk; lastWeek = wk;
+    const swap = t.swaps.hasOwnProperty(row.date)
+      ? '<span class="swaptag">runs as '+DAY_NAMES[t.swaps[row.date]].slice(0,3)+'</span>' : '';
+    html += '<tr><td class="weeklabel">'+wkCell+'</td>'+
+      '<td class="datelabel">'+prettyDate(row.date)+swap+'</td>'+
+      '<td><input type="text" data-i="'+i+'" data-f="topic" value="'+escapeAttr(row.topic)+'"></td>'+
+      '<td><input type="text" data-i="'+i+'" data-f="reading" value="'+escapeAttr(row.reading)+'"></td>'+
+      '<td><button class="ghost danger" data-remove="'+i+'">\u00d7</button></td></tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('input[data-i]').forEach(function(inp){
+    inp.oninput = function(){ state.schedule[+inp.dataset.i][inp.dataset.f]=inp.value; saveState(); };
+  });
+  wrap.querySelectorAll('button[data-remove]').forEach(function(btn){
+    btn.onclick = function(){ state.schedule.splice(+btn.dataset.remove,1); renderSchedule(); saveState(); };
+  });
+}
+
+/* ============================================================
+   Section 7: policies
+   ============================================================ */
+function renderPolicies(){
+  const wrap = document.getElementById('policy-list');
+  wrap.innerHTML='';
+  state.policyOrder.forEach(function(pid){
+    const p = POLICY_DEFS.find(function(x){return x.id===pid;});
+    if(!p) return;
+    const ps = state.policies[p.id];
+    const block = document.createElement('div');
+    block.className='policyblock open';
+    const stanceLabel = (p.stances.find(function(s){return s.id===ps.stance;})||{}).label || 'custom';
+    let stancesHtml = '';
+    p.stances.forEach(function(s){
+      stancesHtml += '<label><input type="radio" name="stance-'+p.id+'" value="'+s.id+'" '+(ps.stance===s.id?'checked':'')+'>'+
+        '<span><b>'+s.label+'</b> <span class="desc">\u2014 '+s.note+'</span></span></label>';
+    });
+    let subHtml = '';
+    if(p.sub){
+      let subOpts = '';
+      p.sub.options.forEach(function(o){
+        subOpts += '<label><input type="radio" name="sub-'+p.id+'" value="'+o.id+'" '+(ps.subStance===o.id?'checked':'')+'>'+
+          '<span><b>'+o.label+'</b> <span class="desc">\u2014 '+o.note+'</span></span></label>';
+      });
+      subHtml = '<h3 style="margin-top:.9rem;">'+p.sub.title+'</h3>'+
+        '<div class="stances">'+subOpts+'</div>'+
+        (ps.subStance && ps.subStance!=='none'
+          ? '<textarea class="policy" data-subtext="'+p.id+'">'+escapeHtml(ps.subText||'')+'</textarea>'
+          : '');
+    }
+    const linkHtml = p.url
+      ? '<p class="hint">Ground-truth this language against the <a href="'+p.url+'" target="_blank" rel="noopener">CNDLS page for this policy</a> before publishing.</p>'
+      : '';
+    block.innerHTML =
+      '<div class="head">'+
+        '<span class="draghandle" title="Drag to reorder">\u28ff</span>'+
+        '<label class="checklabel" onclick="event.stopPropagation()"><input type="checkbox" '+(ps.included?'checked':'')+' data-include="'+p.id+'"> include</label>'+
+        '<span class="title">'+p.title+'</span>'+
+        '<span class="tag">'+stanceLabel+'</span>'+
+      '</div>'+
+      '<div class="body">'+
+        '<div class="stances">'+stancesHtml+'</div>'+
+        '<textarea class="policy" data-text="'+p.id+'">'+escapeHtml(ps.text)+'</textarea>'+
+        subHtml+
+        '<p class="hint">Edit freely \u2014 selecting a different stance replaces this text with the sample language.'+(p.id==='officehours'?' The token {{OH}} auto-fills with your office hours and location from section 2.':'')+'</p>'+
+        linkHtml+
+      '</div>';
+    block.querySelector('.head').onclick = function(){ block.classList.toggle('open'); };
+    block.querySelector('input[data-include]').onchange = function(e){ ps.included = e.target.checked; saveState(); };
+    block.querySelectorAll('input[name="stance-'+p.id+'"]').forEach(function(r){
+      r.onchange = function(){
+        ps.stance = r.value;
+        ps.text = p.stances.find(function(s){return s.id===r.value;}).text;
+        if(p.id==='participation'){ ensureParticipationRow(); renderParticipationPicker(); renderGrading(); }
+        renderPolicies(); saveState();
+      };
+    });
+    if(p.sub){
+      block.querySelectorAll('input[name="sub-'+p.id+'"]').forEach(function(r){
+        r.onchange = function(){
+          ps.subStance = r.value;
+          const opt = p.sub.options.find(function(o){return o.id===r.value;});
+          ps.subText = opt ? opt.text : '';
+          renderPolicies(); saveState();
+        };
+      });
+      const subTa = block.querySelector('textarea[data-subtext]');
+      if(subTa) subTa.oninput = function(e){ ps.subText = e.target.value; saveState(); };
+    }
+    block.querySelector('textarea[data-text]').oninput = function(e){ ps.text = e.target.value; saveState(); };
+    const handle = block.querySelector('.draghandle');
+    handle.onclick = function(e){ e.stopPropagation(); };
+    handle.onmousedown = function(){ block.draggable = true; };
+    block.addEventListener('dragend', function(){ block.draggable = false; });
+    wrap.appendChild(block);
+  });
+  makeSortable(wrap, state.policyOrder, function(){ renderPolicies(); saveState(); });
+}
+function renderMandatory(){
+  const wrap = document.getElementById('mandatory-list');
+  wrap.innerHTML='';
+  MANDATORY_DEFS.forEach(function(m){
+    const block = document.createElement('div');
+    block.className='policyblock open';
+    const mLink = m.url ? ' Verify against the <a href="'+m.url+'" target="_blank" rel="noopener">current official language</a> before publishing.' : '';
+    block.innerHTML =
+      '<div class="head"><span class="title">'+m.title+'</span><span class="tag">required</span></div>'+
+      '<div class="body"><textarea class="policy">'+escapeHtml(state.mandatory[m.id])+'</textarea>'+
+      '<p class="hint">Included in every syllabus.'+mLink+'</p></div>';
+    block.querySelector('.head').onclick = function(){ block.classList.toggle('open'); };
+    block.querySelector('textarea').oninput = function(e){ state.mandatory[m.id]=e.target.value; saveState(); };
+    wrap.appendChild(block);
+  });
+}
+
+/* ============================================================
+   Section 8: markdown output
+   ============================================================ */
+function dayCodesStr(){
+  return DAYCODES.filter(function(d){return state.days.includes(d.num);}).map(function(d){return d.code;}).join('');
+}
+function fillTokens(text){
+  const c = state.course;
+  const oh = c.officeHours ? c.officeHours + (c.officeLoc ? ' \u2014 ' + c.officeLoc : '') : '[office hours \u2014 fill in section 2]';
+  return (text||'').replace(/\{\{OH\}\}/g, oh);
+}
+function mdChunks(){
+  const c = state.course, t = TERMS[state.term];
+  const CH = {};
+  CH.info = function(){
+    const L = ['## Course Information'];
+    L.push('- **Meets:** '+dayCodesStr()+(meetTimeStr()?' '+meetTimeStr():''));
+    if(state.room) L.push('- **Location:** '+state.room);
+    if(c.credits) L.push('- **Credits:** '+c.credits);
+    L.push('- **Instructor:** '+(c.instructor||'[name]'));
+    if(c.email) L.push('- **Email:** '+c.email);
+    if(c.officeHours) L.push('- **Office hours:** '+c.officeHours+(c.officeLoc?' \u2014 '+c.officeLoc:''));
+    L.push(''); return L;
+  };
+  CH.description = function(){ return c.description ? ['## Course Description', c.description, ''] : []; };
+  CH.objectives = function(){
+    if(state.objectivesMode==='paragraph'){
+      return state.objectivesText.trim() ? ['## Learning Objectives', state.objectivesText, ''] : [];
+    }
+    const objs = state.objectives.filter(function(o){return o.trim();});
+    if(!objs.length) return [];
+    const L = ['## Learning Objectives','By the end of this course, you should be able to:'];
+    objs.forEach(function(o){ L.push('- '+o); });
+    L.push(''); return L;
+  };
+  CH.materials = function(){ return state.materials.trim() ? ['## Course Materials', state.materials, ''] : []; };
+  CH.grading = function(){
+    if(!state.grading.length) return [];
+    const hasDesc = state.grading.some(function(g){return (g.desc||'').trim();});
+    const L = ['## Assignments & Grading'];
+    if(hasDesc){
+      L.push('| Component | Weight | Description |'); L.push('|---|---|---|');
+      state.grading.forEach(function(g){ L.push('| '+(g.component||'')+' | '+(g.percent||0)+'% | '+((g.desc||'').replace(/\|/g,'\\|'))+' |'); });
+    }else{
+      L.push('| Component | Weight |'); L.push('|---|---|');
+      state.grading.forEach(function(g){ L.push('| '+(g.component||'')+' | '+(g.percent||0)+'% |'); });
+    }
+    L.push(''); L.push('### Grading Scale');
+    (state.scale||DEFAULT_SCALE).split('\n').forEach(function(line){ if(line.trim()) L.push('- '+line.trim()); });
+    L.push(''); return L;
+  };
+  CH.exams = function(){
+    const ms = state.exams.midterms.filter(function(m){return m.date || (m.label&&m.label.trim());});
+    const f = state.exams.final;
+    if(!ms.length && !(f.enabled && f.date)) return [];
+    const L = ['## Exams'];
+    ms.forEach(function(m){
+      let s = '- **'+(m.label||'Exam')+':**';
+      if(m.date) s += ' '+prettyDate(m.date);
+      if(m.start) s += ', '+fmtTime(m.start)+(m.end?'\u2013'+fmtTime(m.end):'');
+      if(m.location) s += ', '+m.location;
+      if(m.notes) s += ' \u2014 '+m.notes;
+      L.push(s);
+    });
+    if(f.enabled && f.date){
+      let s = '- **Final exam:** '+prettyDate(f.date);
+      if(f.start) s += ', '+fmtTime(f.start)+(f.end?'\u2013'+fmtTime(f.end):'');
+      if(f.location) s += ', '+f.location;
+      if(f.notes) s += ' \u2014 '+f.notes;
+      L.push(s);
+    }
+    L.push(''); return L;
+  };
+  CH.keydates = function(){
+    const L = ['## Important Dates ('+t.label+')'];
+    t.keyDates.forEach(function(k){ L.push('- **'+prettyDate(k.date)+':** '+k.label); });
+    L.push(''); return L;
+  };
+  CH.schedule = function(){
+    if(!state.schedule.length) return [];
+    const L = ['## Course Schedule','| Week | Date | Topic | Reading / Due |','|---|---|---|---|'];
+    let lastWeek=null;
+    state.schedule.forEach(function(row){
+      const wk = weekOf(row.date);
+      const wkLabel = wk===lastWeek?'':wk; lastWeek=wk;
+      let dLabel = prettyDate(row.date);
+      if(t.swaps.hasOwnProperty(row.date)) dLabel += ' *(runs on a '+DAY_NAMES[t.swaps[row.date]]+' schedule)*';
+      L.push('| '+wkLabel+' | '+dLabel+' | '+(row.topic||'')+' | '+(row.reading||'')+' |');
+    });
+    L.push(''); return L;
+  };
+  CH.policies = function(){
+    const L = [];
+    state.policyOrder.forEach(function(pid){
+      const p = POLICY_DEFS.find(function(x){return x.id===pid;});
+      if(!p) return;
+      const ps = state.policies[pid];
+      if(ps.included && ps.text.trim()){
+        if(!L.length) L.push('## Course Policies');
+        L.push('### '+p.title); L.push(fillTokens(ps.text)); L.push('');
+        if(p.sub && ps.subStance && ps.subStance!=='none' && (ps.subText||'').trim()){
+          L.push('**'+p.sub.title.replace(' (addendum)','')+'.** '+fillTokens(ps.subText)); L.push('');
+        }
+      }
+    });
+    return L;
+  };
+  CH.university = function(){
+    const L = ['## University Policies & Resources'];
+    MANDATORY_DEFS.forEach(function(m){
+      if((state.mandatory[m.id]||'').trim()){ L.push('### '+m.title); L.push(state.mandatory[m.id]); L.push(''); }
+    });
+    return L;
+  };
+  return CH;
+}
+function generateMarkdown(){
+  const c = state.course, t = TERMS[state.term];
+  let L = ['# '+(c.title||'[Course Title]')+(c.number?' ('+c.number+(c.section?'-'+c.section:'')+')':''),
+           '**Georgetown University in Qatar \u00b7 '+t.label+'**',''];
+  const CH = mdChunks();
+  state.sectionOrder.forEach(function(id){ if(CH[id]) L = L.concat(CH[id]()); });
+  return L.join('\n').trim()+'\n';
+}
+function generateOnePager(){
+  const c = state.course, t = TERMS[state.term];
+  const L = [];
+  L.push('# '+(c.title||'[Course Title]')+(c.number?' ('+c.number+')':'')+' \u2014 Quickstart');
+  L.push('**'+t.label+' \u00b7 Meets '+dayCodesStr()+(meetTimeStr()?' '+meetTimeStr():'')+(state.room?' \u00b7 '+state.room:'')+'**');
+  L.push('**'+(c.instructor||'[Instructor]')+(c.email?' \u00b7 '+c.email:'')+(c.officeHours?' \u00b7 Office hours: '+c.officeHours:'')+'**');
+  L.push('');
+  if(state.grading.length){
+    L.push('**Grading:** '+state.grading.map(function(g){return (g.component||'?')+' '+(g.percent||0)+'%';}).join(' \u00b7 '));
+    L.push('');
+  }
+  L.push('## Key dates');
+  t.keyDates.forEach(function(k){ L.push('- **'+prettyDate(k.date)+':** '+k.label); });
+  state.exams.midterms.forEach(function(m){
+    if(m.date) L.push('- **'+prettyDate(m.date)+':** '+(m.label||'Exam')+(m.start?' ('+fmtTime(m.start)+')':''));
+  });
+  const f = state.exams.final;
+  if(f.enabled && f.date) L.push('- **'+prettyDate(f.date)+':** Final exam'+(f.start?' ('+fmtTime(f.start)+')':''));
+  L.push('');
+  L.push('## Policies in brief');
+  state.policyOrder.forEach(function(pid){
+    const p = POLICY_DEFS.find(function(x){return x.id===pid;});
+    if(!p) return;
+    const ps = state.policies[pid];
+    if(!ps.included) return;
+    const st = p.stances.find(function(s){return s.id===ps.stance;});
+    L.push('- **'+p.title+':** '+(st ? st.label+' \u2014 '+st.note : 'see full syllabus'));
+  });
+  L.push('');
+  L.push('*This one-pager is a summary for quick reference. The full syllabus governs; see it for complete policy language and the week-by-week schedule.*');
+  return L.join('\n')+'\n';
+}
+/* ---------- iCalendar (.ics) export: importable by Canvas, Google Calendar, Outlook ---------- */
+function icsEscape(s){
+  return (s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+}
+function icsDate(ds){ return ds.replace(/-/g,''); }
+function icsDT(ds,t){ return icsDate(ds)+'T'+t.replace(':','')+'00'; }
+function generateICS(){
+  const c = state.course, t = TERMS[state.term];
+  const now = new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+  const L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//GU-Q Syllabus Builder//EN','CALSCALE:GREGORIAN',
+    'BEGIN:VTIMEZONE','TZID:Asia/Qatar','BEGIN:STANDARD','DTSTART:19700101T000000',
+    'TZOFFSETFROM:+0300','TZOFFSETTO:+0300','TZNAME:AST','END:STANDARD','END:VTIMEZONE'];
+  const courseName = (c.number?c.number+' ':'')+(c.title||'Class');
+  let uid = 0;
+  function ev(summary, ds, startT, endT, desc, loc){
+    L.push('BEGIN:VEVENT');
+    L.push('UID:guq-'+state.term+'-'+(uid++)+'-'+icsDate(ds)+'@guq-syllabus-builder');
+    L.push('DTSTAMP:'+now);
+    if(startT){
+      L.push('DTSTART;TZID=Asia/Qatar:'+icsDT(ds,startT));
+      L.push('DTEND;TZID=Asia/Qatar:'+icsDT(ds, endT||startT));
+    }else{
+      L.push('DTSTART;VALUE=DATE:'+icsDate(ds));
+    }
+    L.push('SUMMARY:'+icsEscape(summary));
+    if(desc) L.push('DESCRIPTION:'+icsEscape(desc));
+    if(loc) L.push('LOCATION:'+icsEscape(loc));
+    L.push('END:VEVENT');
+  }
+  const rows = state.schedule.length ? state.schedule
+             : meetingDates().dates.map(function(ds){ return {date:ds,topic:'',reading:''}; });
+  rows.forEach(function(r){
+    ev(courseName+(r.topic?': '+r.topic:''), r.date, state.times.start, state.times.end, r.reading, state.room);
+  });
+  t.keyDates.forEach(function(k){ ev('[GU-Q] '+k.label, k.date); });
+  state.exams.midterms.forEach(function(m){
+    if(m.date) ev(courseName+' \u2014 '+(m.label||'Exam'), m.date, m.start, m.end, m.notes, m.location||state.room);
+  });
+  const f = state.exams.final;
+  if(f.enabled && f.date) ev(courseName+' \u2014 Final exam', f.date, f.start, f.end, f.notes, f.location);
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+function downloadICS(){
+  const blob = new Blob([generateICS()],{type:'text/calendar'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const name = (state.course.number||'course').replace(/\s+/g,'_');
+  a.href = url; a.download = name+'_'+state.term+'.ics';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+/* ---------- Planner handoff: structured JSON a second app can ingest ---------- */
+function generatePlannerJSON(){
+  const c = state.course, t = TERMS[state.term];
+  return JSON.stringify({
+    format:'guq-course-shell', version:1,
+    generated:new Date().toISOString(),
+    course:{ title:c.title, number:c.number, section:c.section, credits:c.credits,
+             instructor:c.instructor, email:c.email, description:c.description },
+    term:{ id:state.term, label:t.label, start:t.start, end:t.end,
+           holidays:t.holidays, keyDates:t.keyDates, swaps:t.swaps },
+    meeting:{ days:state.days.slice(), start:state.times.start, end:state.times.end, room:state.room },
+    learningObjectives:{ mode:state.objectivesMode,
+      list:state.objectives.filter(function(o){return o.trim();}),
+      paragraph:state.objectivesText },
+    grading: state.grading.map(function(g){ return {component:g.component, percent:g.percent, description:g.desc||''}; }),
+    exams:{ midterms:state.exams.midterms, final:state.exams.final },
+    schedule: state.schedule.map(function(r){
+      return { date:r.date, week:weekOf(r.date), topic:r.topic, reading:r.reading,
+               runsAs: TERMS[state.term].swaps.hasOwnProperty(r.date) ? DAY_NAMES[TERMS[state.term].swaps[r.date]] : null,
+               themes:[], questions:[], objectiveIds:[] };
+    }),
+    policies: state.policyOrder.map(function(pid){
+      const p = POLICY_DEFS.find(function(x){return x.id===pid;});
+      if(!p) return null;
+      const ps = state.policies[pid];
+      return { id:pid, title:p.title, included:ps.included, stance:ps.stance, text:fillTokens(ps.text) };
+    }).filter(Boolean)
+  }, null, 2);
+}
+function downloadPlanner(){
+  const blob = new Blob([generatePlannerJSON()],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const name = (state.course.number||'course').replace(/\s+/g,'_');
+  a.href = url; a.download = name+'_'+state.term+'_shell.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+let lastOutputKind = 'syllabus';
+function renderOutput(){ lastOutputKind='syllabus'; document.getElementById('output').value = generateMarkdown(); }
+function renderOnePager(){ lastOutputKind='onepager'; document.getElementById('output').value = generateOnePager(); }
+async function copyOutput(){
+  const ta = document.getElementById('output');
+  if(!ta.value) renderOutput();
+  try{
+    await navigator.clipboard.writeText(document.getElementById('output').value);
+    document.getElementById('status').textContent='Copied to clipboard';
+  }catch(e){
+    ta.select();
+    document.getElementById('status').textContent='Clipboard blocked \u2014 text selected, copy manually';
+  }
+}
+function downloadOutput(){
+  const ta = document.getElementById('output');
+  if(!ta.value) renderOutput();
+  const blob = new Blob([document.getElementById('output').value],{type:'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const name = (state.course.number||'syllabus').replace(/\s+/g,'_');
+  a.href=url; a.download=name+'_'+state.term+'_'+lastOutputKind+'.md';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ============================================================
+   utils & boot
+   ============================================================ */
+function escapeHtml(s){ return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+function escapeAttr(s){ return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+function renderAll(){
+  bindTermControls();
+  renderDayCodes();
+  renderIntel();
+  bindCourseFields();
+  renderObjectives();
+  renderParticipationPicker();
+  renderGrading();
+  renderSchedule();
+  renderExams();
+  renderPolicies();
+  renderMandatory();
+  renderStructure();
+  document.getElementById('output').value='';
+}
+loadState();
+</script>
+</body>
+</html>
