@@ -234,6 +234,9 @@
   <h3>Grading scale</h3>
   <p class="hint">Georgetown default shown — edit if your scheme differs.</p>
   <textarea id="c-scale"></textarea>
+  <h3>Other grading policies (optional)</h3>
+  <p class="hint">Free text for anything the structured pieces don't cover — rounding rules, curve policy, extra credit, regrade requests, rubric locations, drop-lowest rules, etc.</p>
+  <textarea id="c-gradingnotes" placeholder="e.g., Final grades are not curved and are not rounded up. Regrade requests must be submitted in writing within one week of the grade being posted, and may result in a higher or lower grade."></textarea>
 </section>
 
 <section id="sec-exams">
@@ -596,6 +599,7 @@ function defaultState(){
              {component:'Research paper',percent:30,desc:''},
              {component:'Final exam',percent:25,desc:''}],
     scale: DEFAULT_SCALE,
+    gradingNotes:'',
     schedule:[],
     policies:{},   // id -> {included, stance, text}
     mandatory:{}   // id -> text
@@ -635,6 +639,7 @@ function initPolicyState(s){
   if(!s.times) s.times = {start:'',end:''};
   if(!s.objectivesMode) s.objectivesMode = (s.objectives && s.objectives.some(function(o){return o&&o.trim();})) ? 'list' : 'paragraph';
   if(s.objectivesText===undefined) s.objectivesText = '';
+  if(s.gradingNotes===undefined) s.gradingNotes = '';
   if(!s.exams) s.exams = { midterms:[], final:{enabled:false,date:'',start:'',end:'',location:'',notes:''} };
 }
 
@@ -750,7 +755,7 @@ function renderDayCodes(){
       const i = state.days.indexOf(dc.num);
       if(i>-1) state.days.splice(i,1); else state.days.push(dc.num);
       state.days.sort();
-      renderDayCodes(); renderIntel(); saveState();
+      renderDayCodes(); renderIntel(); renderExams(); saveState();
     }
     b.onclick = toggle;
     b.onkeydown = function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } };
@@ -783,11 +788,11 @@ function renderIntel(){
 function bindTermControls(){
   const sel = document.getElementById('t-term');
   sel.value = state.term;
-  sel.onchange = function(){ state.term = sel.value; renderIntel(); saveState(); };
+  sel.onchange = function(){ state.term = sel.value; renderIntel(); renderExams(); saveState(); };
   const ts = document.getElementById('t-start'); ts.value = state.times.start||'';
-  ts.onchange = function(){ state.times.start = ts.value; saveState(); };
+  ts.onchange = function(){ state.times.start = ts.value; renderExams(); saveState(); };
   const te = document.getElementById('t-end'); te.value = state.times.end||'';
-  te.onchange = function(){ state.times.end = te.value; saveState(); };
+  te.onchange = function(){ state.times.end = te.value; renderExams(); saveState(); };
   const room = document.getElementById('t-room'); room.value = state.room;
   room.oninput = function(){ state.room = room.value; saveState(); };
 }
@@ -812,6 +817,9 @@ function bindCourseFields(){
   const sc = document.getElementById('c-scale');
   sc.value = state.scale || DEFAULT_SCALE;
   sc.oninput = function(){ state.scale = sc.value; saveState(); };
+  const gn = document.getElementById('c-gradingnotes');
+  gn.value = state.gradingNotes||'';
+  gn.oninput = function(){ state.gradingNotes = gn.value; saveState(); };
 }
 
 /* ============================================================
@@ -1276,6 +1284,9 @@ function mdChunks(){
     }
     L.push(''); L.push('### Grading Scale');
     (state.scale||DEFAULT_SCALE).split('\n').forEach(function(line){ if(line.trim()) L.push('- '+line.trim()); });
+    if((state.gradingNotes||'').trim()){
+      L.push(''); L.push('### Other Grading Policies'); L.push(state.gradingNotes);
+    }
     L.push(''); return L;
   };
   CH.exams = function(){
@@ -1459,6 +1470,7 @@ function generatePlannerJSON(){
       list:state.objectives.filter(function(o){return o.trim();}),
       paragraph:state.objectivesText },
     grading: state.grading.map(function(g){ return {component:g.component, percent:g.percent, description:g.desc||''}; }),
+    gradingNotes: state.gradingNotes||'',
     exams:{ midterms:state.exams.midterms.map(function(m){
               const tt = assessmentTimes(m);
               return Object.assign({}, m, {resolvedStart:tt.start, resolvedEnd:tt.end});
