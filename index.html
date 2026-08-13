@@ -237,10 +237,10 @@
 </section>
 
 <section id="sec-exams">
-  <h2><span class="n">6</span> Exams</h2>
-  <h3>Midterms &amp; other exams</h3>
+  <h2><span class="n">6</span> Assessments</h2>
+  <h3>Quizzes, midterms &amp; in-term exams</h3>
   <div id="midterm-list"></div>
-  <div class="btnrow"><button onclick="addMidterm()">+ Add exam</button></div>
+  <div class="btnrow"><button onclick="addMidterm()">+ Add assessment</button></div>
   <h3>Final exam (optional)</h3>
   <label class="checklabel" style="margin-top:.5rem;"><input type="checkbox" id="f-enabled"> This course has a scheduled final exam</label>
   <div id="final-fields" style="display:none;">
@@ -568,7 +568,7 @@ const SECTION_DEFS = {
   objectives:{label:'Learning Objectives'},
   materials:{label:'Course Materials'},
   grading:{label:'Assignments & Grading'},
-  exams:{label:'Exams'},
+  exams:{label:'Assessments'},
   keydates:{label:'Important Dates'},
   schedule:{label:'Course Schedule'},
   policies:{label:'Course Policies'},
@@ -969,15 +969,21 @@ function dateSelect(options, current, onPick){
   return holder;
 }
 function addMidterm(){
-  state.exams.midterms.push({label:'Midterm exam',date:'',start:'',end:'',location:'',notes:''});
+  state.exams.midterms.push({label:'Assessment',mode:'full',date:'',start:'',end:'',location:'',notes:''});
   renderExams(); saveState();
+}
+function assessmentTimes(m){
+  if((m.mode||'full')==='full') return { start:state.times.start, end:state.times.end };
+  return { start:m.start, end:m.end };
 }
 function renderExams(){
   const wrap = document.getElementById('midterm-list');
   wrap.innerHTML='';
-  if(!state.exams.midterms.length) wrap.innerHTML='<p class="empty">No midterms or in-term exams added.</p>';
+  if(!state.exams.midterms.length) wrap.innerHTML='<p class="empty">No assessments added.</p>';
   const classDates = state.days.length ? meetingDates().dates : [];
   state.exams.midterms.forEach(function(m,i){
+    if(m.mode===undefined) m.mode = m.start ? 'part' : 'full';
+    const showTimes = m.mode!=='full';
     const div = document.createElement('div'); div.className='list-item';
     div.innerHTML =
       '<div class="row">'+
@@ -985,9 +991,16 @@ function renderExams(){
         '<div><label>Date (from your class meetings)</label><span data-dateslot></span></div>'+
       '</div>'+
       '<div class="row">'+
-        '<div><label>Start</label><input type="time" data-f="start" value="'+m.start+'"></div>'+
-        '<div><label>End</label><input type="time" data-f="end" value="'+m.end+'"></div>'+
-        '<div><label>Location</label><input type="text" data-f="location" value="'+escapeAttr(m.location)+'"></div>'+
+        '<div><label>Timing</label><select data-mode>'+
+          '<option value="full" '+(m.mode==='full'?'selected':'')+'>In class \u2014 full period</option>'+
+          '<option value="part" '+(m.mode==='part'?'selected':'')+'>In class \u2014 partial</option>'+
+          '<option value="outside" '+(m.mode==='outside'?'selected':'')+'>Outside class time</option>'+
+        '</select></div>'+
+        (showTimes
+          ? '<div><label>Start</label><input type="time" data-f="start" value="'+m.start+'"></div>'+
+            '<div><label>End</label><input type="time" data-f="end" value="'+m.end+'"></div>'
+          : '<div style="flex:2;"><p class="hint" style="margin-top:1.4rem;">Uses your class start/end times from section 1'+(state.times.start?' ('+meetTimeStr()+')':' \u2014 none set yet')+'.</p></div>')+
+        '<div><label>Location</label><input type="text" data-f="location" value="'+escapeAttr(m.location)+'" placeholder="'+(m.mode!=='outside'?'defaults to classroom':'')+'"></div>'+
       '</div>'+
       '<p class="hint" data-hint></p>'+
       '<div class="btnrow"><button class="ghost danger">Remove</button></div>';
@@ -998,12 +1011,16 @@ function renderExams(){
       const isHoliday = t.holidays.some(function(h){return h.date===m.date;});
       const isMeeting = state.days.includes(effectiveDay(m.date));
       if(isHoliday) el.innerHTML='<span class="warn">\u26a0 That date is a GU-Q holiday ('+t.holidays.find(function(h){return h.date===m.date;}).label+').</span>';
-      else if(!isMeeting) el.innerHTML='<span class="warn">\u26a0 That date isn\u2019t one of your meeting days.</span>';
-      else el.innerHTML='<span class="ok">\u2713 Falls on one of your class meetings.</span>';
+      else if(!isMeeting && m.mode!=='outside') el.innerHTML='<span class="warn">\u26a0 That date isn\u2019t one of your meeting days.</span>';
+      else el.innerHTML = m.mode!=='outside' ? '<span class="ok">\u2713 Falls on one of your class meetings.</span>' : '';
     }
     div.querySelector('[data-dateslot]').appendChild(
       dateSelect(classDates, m.date, function(v){ m.date=v; hint(); saveState(); })
     );
+    div.querySelector('[data-mode]').onchange = function(e){
+      m.mode = e.target.value;
+      renderExams(); saveState();
+    };
     div.querySelectorAll('input[data-f]').forEach(function(inp){
       inp.addEventListener('input',function(){ m[inp.dataset.f]=inp.value; saveState(); });
     });
@@ -1265,12 +1282,15 @@ function mdChunks(){
     const ms = state.exams.midterms.filter(function(m){return m.date || (m.label&&m.label.trim());});
     const f = state.exams.final;
     if(!ms.length && !(f.enabled && f.date)) return [];
-    const L = ['## Exams'];
+    const L = ['## Assessments'];
     ms.forEach(function(m){
-      let s = '- **'+(m.label||'Exam')+':**';
+      const tt = assessmentTimes(m);
+      let s = '- **'+(m.label||'Assessment')+':**';
       if(m.date) s += ' '+prettyDate(m.date);
-      if(m.start) s += ', '+fmtTime(m.start)+(m.end?'\u2013'+fmtTime(m.end):'');
+      if((m.mode||'full')==='full') s += ' (in class'+(tt.start?', '+fmtTime(tt.start)+(tt.end?'\u2013'+fmtTime(tt.end):''):'')+')';
+      else if(tt.start) s += ', '+fmtTime(tt.start)+(tt.end?'\u2013'+fmtTime(tt.end):'');
       if(m.location) s += ', '+m.location;
+      else if((m.mode||'full')!=='outside' && state.room) s += ', '+state.room;
       if(m.notes) s += ' \u2014 '+m.notes;
       L.push(s);
     });
@@ -1348,7 +1368,10 @@ function generateOnePager(){
   L.push('## Key dates');
   t.keyDates.forEach(function(k){ L.push('- **'+prettyDate(k.date)+':** '+k.label); });
   state.exams.midterms.forEach(function(m){
-    if(m.date) L.push('- **'+prettyDate(m.date)+':** '+(m.label||'Exam')+(m.start?' ('+fmtTime(m.start)+')':''));
+    if(m.date){
+      const tt = assessmentTimes(m);
+      L.push('- **'+prettyDate(m.date)+':** '+(m.label||'Assessment')+(tt.start?' ('+fmtTime(tt.start)+')':''));
+    }
   });
   const f = state.exams.final;
   if(f.enabled && f.date) L.push('- **'+prettyDate(f.date)+':** Final exam'+(f.start?' ('+fmtTime(f.start)+')':''));
@@ -1402,7 +1425,10 @@ function generateICS(){
   });
   t.keyDates.forEach(function(k){ ev('[GU-Q] '+k.label, k.date); });
   state.exams.midterms.forEach(function(m){
-    if(m.date) ev(courseName+' \u2014 '+(m.label||'Exam'), m.date, m.start, m.end, m.notes, m.location||state.room);
+    if(m.date){
+      const tt = assessmentTimes(m);
+      ev(courseName+' \u2014 '+(m.label||'Assessment'), m.date, tt.start, tt.end, m.notes, m.location||state.room);
+    }
   });
   const f = state.exams.final;
   if(f.enabled && f.date) ev(courseName+' \u2014 Final exam', f.date, f.start, f.end, f.notes, f.location);
@@ -1433,7 +1459,10 @@ function generatePlannerJSON(){
       list:state.objectives.filter(function(o){return o.trim();}),
       paragraph:state.objectivesText },
     grading: state.grading.map(function(g){ return {component:g.component, percent:g.percent, description:g.desc||''}; }),
-    exams:{ midterms:state.exams.midterms, final:state.exams.final },
+    exams:{ midterms:state.exams.midterms.map(function(m){
+              const tt = assessmentTimes(m);
+              return Object.assign({}, m, {resolvedStart:tt.start, resolvedEnd:tt.end});
+            }), final:state.exams.final },
     schedule: state.schedule.map(function(r){
       return { date:r.date, week:weekOf(r.date), topic:r.topic, reading:r.reading,
                runsAs: TERMS[state.term].swaps.hasOwnProperty(r.date) ? DAY_NAMES[TERMS[state.term].swaps[r.date]] : null,
