@@ -2,7 +2,7 @@
 
 A single-file web tool for Georgetown University in Qatar faculty to build compliant, customizable syllabi for AY 2026–27.
 
-**Use it here:** https://YOUR-USERNAME.github.io/guq-syllabus-builder/
+**Use it here:** https://profmusgrave.github.io/guq-syllabus-builder/
 
 ## What it does
 
