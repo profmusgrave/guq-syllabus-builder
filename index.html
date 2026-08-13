@@ -104,6 +104,7 @@
   .weeklabel{ font-family:Georgia,serif; font-weight:700; color:var(--gu-blue); white-space:nowrap; }
   .datelabel{ white-space:nowrap; color:var(--gu-gray); }
   .swaptag{ font-size:.65rem; color:var(--warn); display:block; }
+  .examtag{ font-size:.65rem; color:var(--gu-blue); font-weight:700; display:block; }
 
   .hint{ font-size:.76rem; color:var(--gu-gray); margin-top:.35rem; }
   .warn{ color:var(--warn); }
@@ -1023,16 +1024,20 @@ function renderExams(){
       else el.innerHTML = m.mode!=='outside' ? '<span class="ok">\u2713 Falls on one of your class meetings.</span>' : '';
     }
     div.querySelector('[data-dateslot]').appendChild(
-      dateSelect(classDates, m.date, function(v){ m.date=v; hint(); saveState(); })
+      dateSelect(classDates, m.date, function(v){ m.date=v; hint(); renderSchedule(); saveState(); })
     );
     div.querySelector('[data-mode]').onchange = function(e){
       m.mode = e.target.value;
       renderExams(); saveState();
     };
     div.querySelectorAll('input[data-f]').forEach(function(inp){
-      inp.addEventListener('input',function(){ m[inp.dataset.f]=inp.value; saveState(); });
+      inp.addEventListener('input',function(){
+        m[inp.dataset.f]=inp.value;
+        if(inp.dataset.f==='label') renderSchedule();
+        saveState();
+      });
     });
-    div.querySelector('button.danger').onclick = function(){ state.exams.midterms.splice(i,1); renderExams(); saveState(); };
+    div.querySelector('button.danger').onclick = function(){ state.exams.midterms.splice(i,1); renderExams(); renderSchedule(); saveState(); };
     hint();
     wrap.appendChild(div);
   });
@@ -1112,6 +1117,9 @@ function regenerateSchedule(){
   });
   renderSchedule(); saveState();
 }
+function assessmentsOn(dateStr){
+  return state.exams.midterms.filter(function(m){ return m.date===dateStr; });
+}
 function renderSchedule(){
   const wrap = document.getElementById('schedule-table');
   if(!state.schedule.length){ wrap.innerHTML='<p class="empty">No schedule yet. Set term and days above, then click Generate.</p>'; return; }
@@ -1123,8 +1131,11 @@ function renderSchedule(){
     const wkCell = wk===lastWeek ? '' : wk; lastWeek = wk;
     const swap = t.swaps.hasOwnProperty(row.date)
       ? '<span class="swaptag">runs as '+DAY_NAMES[t.swaps[row.date]].slice(0,3)+'</span>' : '';
+    const exams = assessmentsOn(row.date).map(function(m){
+      return '<span class="examtag">'+escapeHtml(m.label||'Assessment')+'</span>';
+    }).join('');
     html += '<tr><td class="weeklabel">'+wkCell+'</td>'+
-      '<td class="datelabel">'+prettyDate(row.date)+swap+'</td>'+
+      '<td class="datelabel">'+prettyDate(row.date)+swap+exams+'</td>'+
       '<td><input type="text" data-i="'+i+'" data-f="topic" value="'+escapeAttr(row.topic)+'"></td>'+
       '<td><input type="text" data-i="'+i+'" data-f="reading" value="'+escapeAttr(row.reading)+'"></td>'+
       '<td><button class="ghost danger" data-remove="'+i+'">\u00d7</button></td></tr>';
@@ -1328,7 +1339,9 @@ function mdChunks(){
       const wkLabel = wk===lastWeek?'':wk; lastWeek=wk;
       let dLabel = prettyDate(row.date);
       if(t.swaps.hasOwnProperty(row.date)) dLabel += ' *(runs on a '+DAY_NAMES[t.swaps[row.date]]+' schedule)*';
-      L.push('| '+wkLabel+' | '+dLabel+' | '+(row.topic||'')+' | '+(row.reading||'')+' |');
+      const examLabels = assessmentsOn(row.date).map(function(m){ return '**'+(m.label||'Assessment')+'**'; });
+      const due = examLabels.concat(row.reading?[row.reading]:[]).join(' \u00b7 ');
+      L.push('| '+wkLabel+' | '+dLabel+' | '+(row.topic||'')+' | '+due+' |');
     });
     L.push(''); return L;
   };
